@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { previewSitesApi } from "../../api/previewSites";
-import type { MiniProjectDto, MiniProjectSectionDto, PreviewSiteDto } from "../../api/types";
+import type { MiniProjectDto, MiniProjectSectionDto } from "../../api/types";
 
 const emptySections = (): MiniProjectSectionDto[] => [
   { heading: "", paragraph: "" },
