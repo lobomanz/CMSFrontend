@@ -1,8 +1,43 @@
-export type AboutUsDto = Record<string, unknown> & { id?: number };
-export type BlogDto = Record<string, unknown> & { id?: number; title?: string; content?: string; createdAt?: string };
-export type ImageModelDto = Record<string, unknown> & { id?: number; url?: string; path?: string; fileUrl?: string };
-export type ProjectDto = Record<string, unknown> & { id?: number };
-export type ContactInfoDto = Record<string, unknown> & { id?: number };
-export type UserDto = Record<string, unknown> & { id?: number; username?: string; password?: string };
-export type RegisterDto = { username: string; password: string; confirmPassword: string };
-export type AuthResponse = { token: string };
+export interface ProjectDto {
+    id?: number;
+    title: string;
+    description: string;
+    imageUrl?: string;
+    projectUrl?: string;
+    sortOrder?: number;
+    isPublished?: boolean;
+    tags?: string[];
+  }
+  
+  export interface BlogDto {
+    id?: number;
+    title: string;
+    content: string;
+    author: string;
+    imageUrl?: string;
+    isPublished?: boolean;
+    tags?: string[];
+    createdAt?: string;
+  }
+  
+  export interface ImageModelDto {
+    id?: number;
+    url: string;
+    altText?: string;
+    sortOrder?: number;
+  }
+  
+  export interface AboutUsDto {
+    id?: number;
+    content: any; // JSON content
+  }
+  
+  export interface ContactInfoDto {
+    id?: number;
+    data: any; // JSON content for contact info
+  }
+  
+  export interface ApiError {
+    message: string;
+  }
+  

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { aboutUsApi } from '../../api/aboutUs';
-import type { AboutUsDto } from '../../api/types';
+import type { AboutUsDto, ApiError } from '../../api/types';
 import Button from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import JsonEditor from '../../components/ui/JsonEditor';

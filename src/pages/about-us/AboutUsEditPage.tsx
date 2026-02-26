@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { aboutUsApi } from '../../api/aboutUs';
-import type { AboutUsDto } from '../../api/types';
+import type { AboutUsDto, ApiError } from '../../api/types';
 import Button from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import JsonEditor from '../../components/ui/JsonEditor';
@@ -35,7 +35,7 @@ const AboutUsEditPage: React.FC = () => {
     }
   }, [initialData]);
 
-  const updateAboutUsMutation = useMutation<AboutUsDto, AxiosError, { id: string, data: AboutUsDto }>({
+  const updateAboutUsMutation = useMutation<AboutUsDto, AxiosError<ApiError>, { id: string, data: AboutUsDto }>({
     mutationFn: ({ id, data }) => aboutUsApi.update(id, data),
     onSuccess: (data) => {
       toast.success(`About Us entry with ID: ${id} updated successfully!`);

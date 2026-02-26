@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { blogApi } from '../../api/blog';
-import type { BlogDto } from '../../api/types';
+import type { BlogDto, ApiError } from '../../api/types';
 import Button from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import Spinner from '../../components/ui/Spinner';
@@ -54,7 +54,7 @@ const BlogEditPage: React.FC = () => {
     }
   }, [initialData, reset]);
 
-  const updateBlogMutation = useMutation<BlogDto, AxiosError, { id: string, data: BlogDto }>({
+  const updateBlogMutation = useMutation<BlogDto, AxiosError<ApiError>, { id: string, data: BlogDto }>({
     mutationFn: ({ id, data }) => blogApi.update(id, data),
     onSuccess: (data) => {
       toast.success(`Blog entry with ID: ${id} updated successfully!`);

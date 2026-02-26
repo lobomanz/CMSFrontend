@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { blogApi } from '../../api/blog';
-import type { BlogDto } from '../../api/types';
+import type { BlogDto, ApiError } from '../../api/types';
 import Button from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import Spinner from '../../components/ui/Spinner';
@@ -39,7 +39,7 @@ const BlogCreatePage: React.FC = () => {
     },
   });
 
-  const createBlogMutation = useMutation<BlogDto, AxiosError, BlogDto>({
+  const createBlogMutation = useMutation<BlogDto, AxiosError<ApiError>, BlogDto>({
     mutationFn: blogApi.create,
     onSuccess: (data) => {
       toast.success(`Blog entry created successfully with ID: ${data.id}`);
