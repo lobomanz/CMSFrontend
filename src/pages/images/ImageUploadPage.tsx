@@ -25,7 +25,7 @@ const ImageUploadPage: React.FC = () => {
       navigate(`/images/${data.id}`);
     },
     onError: (error) => {
-      toast.error(`Failed to upload image: ${error.response?.data?.message || error.message}`);
+      toast.error(`Failed to upload image: ${error.message}`);
     },
   });
 
@@ -98,7 +98,7 @@ const ImageUploadPage: React.FC = () => {
             </Button>
             {uploadImageMutation.isError && (
               <p className="text-red-500 text-sm text-center">
-                {uploadImageMutation.error?.response?.data?.message || uploadImageMutation.error?.message}
+                {uploadImageMutation.error?.message}
               </p>
             )}
           </form>
