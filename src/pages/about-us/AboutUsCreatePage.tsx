@@ -29,7 +29,7 @@ const AboutUsCreatePage: React.FC = () => {
   });
 
   const handleJsonChange = (value: Record<string, unknown>, isValid: boolean) => {
-    setFormData(value as AboutUsDto);
+    setFormData(value as unknown as AboutUsDto);
     setIsJsonValid(isValid);
   };
 

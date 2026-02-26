@@ -44,7 +44,7 @@ const ContactInfoPage: React.FC = () => {
   });
 
   const handleJsonChange = (value: Record<string, unknown>, isValid: boolean) => {
-    setFormData(value as ContactInfoDto);
+    setFormData(value as unknown as ContactInfoDto);
     setIsJsonValid(isValid);
   };
 

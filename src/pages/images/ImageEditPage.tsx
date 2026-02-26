@@ -49,7 +49,7 @@ const ImageEditPage: React.FC = () => {
   });
 
   const handleJsonChange = (value: Record<string, unknown>, isValid: boolean) => {
-    setFormData(value as ImageModelDto);
+    setFormData(value as unknown as ImageModelDto);
     setIsJsonValid(isValid);
   };
 
