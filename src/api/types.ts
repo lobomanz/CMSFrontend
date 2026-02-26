@@ -49,10 +49,15 @@ export interface ProjectDto {
     password?: string;
   }
   
+  export type UserRole = 'Admin' | 'Basic';
+
   export interface RegisterDto {
-    username: string;
-    password?: string;
-  }
+  username: string;
+  password: string;
+  confirmPassword: string;
+  role: UserRole;
+  isActive: boolean;
+}
   
   export interface AuthResponse {
     token: string;
