@@ -35,7 +35,7 @@ const ImageListPage: React.FC = () => {
       setIsModalOpen(false);
       setImageToDelete(null);
     },
-    onError: (err) => {
+    onError: (err: AxiosError<ApiError>) => {
       toast.error(`Failed to delete image: ${err.response?.data?.message || err.message}`);
     },
   });

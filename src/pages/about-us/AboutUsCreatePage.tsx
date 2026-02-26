@@ -13,23 +13,23 @@ import { AxiosError } from 'axios';
 const AboutUsCreatePage: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [formData, setFormData] = useState<AboutUsDto>({});
+  const [formData, setFormData] = useState<AboutUsDto>({ content: {} });
   const [isJsonValid, setIsJsonValid] = useState<boolean>(true);
 
-  const createAboutUsMutation = useMutation<AboutUsDto, AxiosError, AboutUsDto>({
+  const createAboutUsMutation = useMutation<AboutUsDto, AxiosError<ApiError>, AboutUsDto>({
     mutationFn: aboutUsApi.create,
     onSuccess: (data) => {
       toast.success(`About Us entry created successfully with ID: ${data.id}`);
       queryClient.invalidateQueries({ queryKey: ['aboutUs'] }); // Invalidate any list/detail queries
       navigate(`/about-us/${data.id}`);
     },
-    onError: (error) => {
+    onError: (error: AxiosError<ApiError>) => {
       toast.error(`Failed to create About Us entry: ${error.response?.data?.message || error.message}`);
     },
   });
 
   const handleJsonChange = (value: Record<string, unknown>, isValid: boolean) => {
-    setFormData(value);
+    setFormData(value as AboutUsDto);
     setIsJsonValid(isValid);
   };
 
@@ -53,7 +53,7 @@ const AboutUsCreatePage: React.FC = () => {
             <JsonEditor
               id="aboutUsJsonEditor"
               label="About Us Data (JSON)"
-              value={formData}
+              value={formData as unknown as Record<string, unknown>}
               onChange={handleJsonChange}
               rows={20}
             />

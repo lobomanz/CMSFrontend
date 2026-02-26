@@ -35,7 +35,7 @@ const ProjectListPage: React.FC = () => {
       setIsModalOpen(false);
       setProjectToDelete(null);
     },
-    onError: (err) => {
+    onError: (err: AxiosError<ApiError>) => {
       toast.error(`Failed to delete project: ${err.response?.data?.message || err.message}`);
     },
   });

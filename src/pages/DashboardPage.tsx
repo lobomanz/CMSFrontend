@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuthStore } from '../auth/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import Button from '../components/ui/Button';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { imageApi } from '../api/image';
 import Spinner from '../components/ui/Spinner';
 import { toast } from 'react-hot-toast';
@@ -11,23 +11,20 @@ const DashboardPage: React.FC = () => {
   const { user } = useAuthStore();
   const [pingResult, setPingResult] = useState<string | null>(null);
 
-  const {
-    data: pingData,
-    isLoading: isPingLoading,
-    refetch: refetchPing,
-  } = useQuery<string, Error>({
-    queryKey: ['imagePing'],
-    queryFn: imageApi.ping,
-    enabled: false, // Don't run automatically
-    onSuccess: (data) => setPingResult(data),
-    onError: (error) => {
+  const { mutate: ping, isPending: isPinging } = useMutation({
+    mutationFn: imageApi.ping,
+    onSuccess: (data: string) => {
+      setPingResult(data);
+      toast.success('Successfully pinged the image API!');
+    },
+    onError: (error: Error) => {
       setPingResult(`Error: ${error.message}`);
       toast.error('Failed to ping image API.');
     },
   });
 
   const handlePing = () => {
-    refetchPing();
+    ping();
   };
 
   return (
@@ -41,8 +38,8 @@ const DashboardPage: React.FC = () => {
 
           <h3 className="text-lg font-semibold">API Connectivity Test</h3>
           <p>Click the button below to test connectivity to the Image API endpoint.</p>
-          <Button onClick={handlePing} disabled={isPingLoading}>
-            {isPingLoading ? <Spinner size="sm" /> : 'Ping Image API'}
+          <Button onClick={handlePing} disabled={isPinging}>
+            {isPinging ? <Spinner size="sm" /> : 'Ping Image API'}
           </Button>
           {pingResult && (
             <div className="mt-2 p-3 bg-gray-100 rounded-md text-sm">

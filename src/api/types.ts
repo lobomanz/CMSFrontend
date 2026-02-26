@@ -23,6 +23,8 @@ export interface ProjectDto {
   export interface ImageModelDto {
     id?: number;
     url: string;
+    fileUrl?: string;
+    path?: string;
     altText?: string;
     sortOrder?: number;
   }
@@ -41,3 +43,17 @@ export interface ProjectDto {
     message: string;
   }
   
+  export interface UserDto {
+    id?: string;
+    username: string;
+    password?: string;
+  }
+  
+  export interface RegisterDto {
+    username: string;
+    password?: string;
+  }
+  
+  export interface AuthResponse {
+    token: string;
+  }

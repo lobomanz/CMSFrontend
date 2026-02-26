@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { blogApi } from '../../api/blog';
 import type { BlogDto, ApiError } from '../../api/types';
@@ -14,6 +14,7 @@ import { z } from 'zod';
 import FormField from '../../components/ui/FormField';
 import Input from '../../components/ui/Input';
 import Textarea from '../../components/ui/Textarea';
+import { useAuthStore } from '../../auth/useAuth'; // Import useAuthStore
 
 const blogSchema = z.object({
   title: z.string().min(1, 'Title is required').optional(),
@@ -26,6 +27,7 @@ type BlogFormInputs = z.infer<typeof blogSchema>;
 const BlogCreatePage: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuthStore(); // Get user from auth store
 
   const {
     register,
@@ -46,13 +48,18 @@ const BlogCreatePage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['blogs'] }); // Invalidate blog list
       navigate(`/blogs/${data.id}`);
     },
-    onError: (error) => {
+    onError: (error: AxiosError<ApiError>) => {
       toast.error(`Failed to create blog entry: ${error.response?.data?.message || error.message}`);
     },
   });
 
   const onSubmit = (data: BlogFormInputs) => {
-    createBlogMutation.mutate(data);
+    // Add author from the authenticated user
+    const blogData: BlogDto = {
+      ...data,
+      author: user?.username || 'Unknown', // Default to 'Unknown' if user is not available
+    } as BlogDto; // Cast to BlogDto
+    createBlogMutation.mutate(blogData);
   };
 
   return (

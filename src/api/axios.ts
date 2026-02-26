@@ -42,6 +42,7 @@ axiosInstance.interceptors.response.use(
 
 // Generic API functions
 export const api = {
+  get: <T>(url: string) => axiosInstance.get<T>(url).then(res => res.data),
   getList: <T>(url: string) => axiosInstance.get<T[]>(url).then(res => res.data),
   getOne: <T>(url: string, id: string | number) => axiosInstance.get<T>(`${url}/${id}`).then(res => res.data),
   create: <T, R>(url: string, data: T) => axiosInstance.post<R>(url, data).then(res => res.data),

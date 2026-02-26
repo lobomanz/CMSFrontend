@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { contactInfoApi } from '../../api/contactInfo';
-import type { ContactInfoDto } from '../../api/types';
+import type { ContactInfoDto, ApiError } from '../../api/types';
 import Button from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import JsonEditor from '../../components/ui/JsonEditor';
@@ -11,7 +11,7 @@ import { AxiosError } from 'axios';
 
 const ContactInfoPage: React.FC = () => {
   const queryClient = useQueryClient();
-  const [formData, setFormData] = useState<ContactInfoDto>({});
+  const [formData, setFormData] = useState<ContactInfoDto>({ data: {} });
   const [isJsonValid, setIsJsonValid] = useState<boolean>(true);
 
   const {
@@ -32,19 +32,19 @@ const ContactInfoPage: React.FC = () => {
     }
   }, [contactInfoData]);
 
-  const upsertContactInfoMutation = useMutation<ContactInfoDto, AxiosError, ContactInfoDto>({
+  const upsertContactInfoMutation = useMutation<ContactInfoDto, AxiosError<ApiError>, ContactInfoDto>({
     mutationFn: contactInfoApi.upsert,
     onSuccess: () => {
       toast.success('Contact Info updated successfully!');
       queryClient.invalidateQueries({ queryKey: ['contactInfo'] }); // Invalidate to refetch fresh data
     },
-    onError: (error) => {
+    onError: (error: AxiosError<ApiError>) => {
       toast.error(`Failed to update Contact Info: ${error.response?.data?.message || error.message}`);
     },
   });
 
   const handleJsonChange = (value: Record<string, unknown>, isValid: boolean) => {
-    setFormData(value);
+    setFormData(value as ContactInfoDto);
     setIsJsonValid(isValid);
   };
 
@@ -80,7 +80,7 @@ const ContactInfoPage: React.FC = () => {
             <JsonEditor
               id="contactInfoJsonEditor"
               label="Contact Info Data (JSON)"
-              value={formData}
+              value={formData as unknown as Record<string, unknown>}
               onChange={handleJsonChange}
               rows={15}
             />

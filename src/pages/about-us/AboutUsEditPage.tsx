@@ -15,7 +15,7 @@ const AboutUsEditPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
 
-  const [formData, setFormData] = useState<AboutUsDto>({});
+  const [formData, setFormData] = useState<AboutUsDto>({ content: {} });
   const [isJsonValid, setIsJsonValid] = useState<boolean>(true);
 
   const {
@@ -37,18 +37,18 @@ const AboutUsEditPage: React.FC = () => {
 
   const updateAboutUsMutation = useMutation<AboutUsDto, AxiosError<ApiError>, { id: string, data: AboutUsDto }>({
     mutationFn: ({ id, data }) => aboutUsApi.update(id, data),
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success(`About Us entry with ID: ${id} updated successfully!`);
       queryClient.invalidateQueries({ queryKey: ['aboutUs', id] });
       navigate(`/about-us/${id}`);
     },
-    onError: (error) => {
+    onError: (error: AxiosError<ApiError>) => {
       toast.error(`Failed to update About Us entry: ${error.response?.data?.message || error.message}`);
     },
   });
 
   const handleJsonChange = (value: Record<string, unknown>, isValid: boolean) => {
-    setFormData(value);
+    setFormData(value as AboutUsDto);
     setIsJsonValid(isValid);
   };
 
@@ -92,7 +92,7 @@ const AboutUsEditPage: React.FC = () => {
             <JsonEditor
               id="aboutUsJsonEditor"
               label="About Us Data (JSON)"
-              value={formData}
+              value={formData as unknown as Record<string, unknown>}
               onChange={handleJsonChange}
               rows={20}
             />

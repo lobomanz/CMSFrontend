@@ -50,7 +50,7 @@ const ProjectDetailPage: React.FC = () => {
         <CardContent className="space-y-4">
           <JsonEditor
             id="projectJsonView"
-            value={projectData}
+            value={projectData as unknown as Record<string, unknown>}
             onChange={() => {}} // Read-only view
             rows={15}
             className="bg-gray-50 p-3 rounded-md"

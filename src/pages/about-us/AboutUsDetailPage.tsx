@@ -94,7 +94,7 @@ const AboutUsDetailPage: React.FC = () => {
               <h3 className="text-lg font-semibold">Loaded Data for ID: {fetchId}</h3>
               <JsonEditor
                 id="aboutUsJsonView"
-                value={aboutUsData}
+                value={aboutUsData as unknown as Record<string, unknown>}
                 onChange={() => {}} // Read-only view
                 rows={15}
                 className="bg-gray-50 p-3 rounded-md"

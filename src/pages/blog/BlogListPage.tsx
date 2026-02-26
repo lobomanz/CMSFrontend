@@ -35,7 +35,7 @@ const BlogListPage: React.FC = () => {
       setIsModalOpen(false);
       setBlogToDelete(null);
     },
-    onError: (err) => {
+    onError: (err: AxiosError<ApiError>) => {
       toast.error(`Failed to delete blog: ${err.response?.data?.message || err.message}`);
     },
   });

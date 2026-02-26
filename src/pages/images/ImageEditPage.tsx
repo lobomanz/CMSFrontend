@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { imageApi } from '../../api/image';
-import type { ImageModelDto } from '../../api/types';
+import type { ImageModelDto, ApiError } from '../../api/types';
 import Button from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import JsonEditor from '../../components/ui/JsonEditor';
@@ -15,7 +15,7 @@ const ImageEditPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
 
-  const [formData, setFormData] = useState<ImageModelDto>({});
+  const [formData, setFormData] = useState<ImageModelDto>({ url: '' });
   const [isJsonValid, setIsJsonValid] = useState<boolean>(true);
 
   const {
@@ -35,21 +35,21 @@ const ImageEditPage: React.FC = () => {
     }
   }, [initialData]);
 
-  const updateImageMutation = useMutation<ImageModelDto, AxiosError, { id: string, data: ImageModelDto }>({
+  const updateImageMutation = useMutation<ImageModelDto, AxiosError<ApiError>, { id: string, data: ImageModelDto }>({
     mutationFn: ({ id, data }) => imageApi.update(id, data),
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success(`Image metadata with ID: ${id} updated successfully!`);
       queryClient.invalidateQueries({ queryKey: ['image', id] });
       queryClient.invalidateQueries({ queryKey: ['images'] });
       navigate(`/images/${id}`);
     },
-    onError: (error) => {
+    onError: (error: AxiosError<ApiError>) => {
       toast.error(`Failed to update image metadata: ${error.response?.data?.message || error.message}`);
     },
   });
 
   const handleJsonChange = (value: Record<string, unknown>, isValid: boolean) => {
-    setFormData(value);
+    setFormData(value as ImageModelDto);
     setIsJsonValid(isValid);
   };
 
@@ -93,7 +93,7 @@ const ImageEditPage: React.FC = () => {
             <JsonEditor
               id="imageJsonEditor"
               label="Image Metadata (JSON)"
-              value={formData}
+              value={formData as unknown as Record<string, unknown>}
               onChange={handleJsonChange}
               rows={20}
             />

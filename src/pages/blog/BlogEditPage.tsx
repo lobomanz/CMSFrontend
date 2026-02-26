@@ -56,13 +56,13 @@ const BlogEditPage: React.FC = () => {
 
   const updateBlogMutation = useMutation<BlogDto, AxiosError<ApiError>, { id: string, data: BlogDto }>({
     mutationFn: ({ id, data }) => blogApi.update(id, data),
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success(`Blog entry with ID: ${id} updated successfully!`);
       queryClient.invalidateQueries({ queryKey: ['blog', id] }); // Invalidate specific blog
       queryClient.invalidateQueries({ queryKey: ['blogs'] }); // Invalidate blog list
       navigate(`/blogs/${id}`);
     },
-    onError: (error) => {
+    onError: (error: AxiosError<ApiError>) => {
       toast.error(`Failed to update blog entry: ${error.response?.data?.message || error.message}`);
     },
   });
@@ -72,7 +72,11 @@ const BlogEditPage: React.FC = () => {
       toast.error('No ID provided for update.');
       return;
     }
-    updateBlogMutation.mutate({ id, data });
+    const blogData: BlogDto = {
+      ...data,
+      author: initialData?.author || 'Unknown', // Use original author or default
+    } as BlogDto;
+    updateBlogMutation.mutate({ id, data: blogData });
   };
 
   if (isInitialLoading) {

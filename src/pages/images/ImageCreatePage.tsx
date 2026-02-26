@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { imageApi } from '../../api/image';
-import type { ImageModelDto } from '../../api/types';
+import type { ImageModelDto, ApiError } from '../../api/types';
 import Button from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import JsonEditor from '../../components/ui/JsonEditor';
@@ -13,23 +13,23 @@ import { AxiosError } from 'axios';
 const ImageCreatePage: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [formData, setFormData] = useState<ImageModelDto>({});
+  const [formData, setFormData] = useState<ImageModelDto>({ url: '' });
   const [isJsonValid, setIsJsonValid] = useState<boolean>(true);
 
-  const createImageMutation = useMutation<ImageModelDto, AxiosError, ImageModelDto>({
+  const createImageMutation = useMutation<ImageModelDto, AxiosError<ApiError>, ImageModelDto>({
     mutationFn: imageApi.create,
     onSuccess: (data) => {
       toast.success(`Image metadata created successfully with ID: ${data.id}`);
       queryClient.invalidateQueries({ queryKey: ['images'] }); // Invalidate any list/detail queries
       navigate(`/images/${data.id}`);
     },
-    onError: (error) => {
+    onError: (error: AxiosError<ApiError>) => {
       toast.error(`Failed to create image metadata: ${error.response?.data?.message || error.message}`);
     },
   });
 
   const handleJsonChange = (value: Record<string, unknown>, isValid: boolean) => {
-    setFormData(value);
+    setFormData(value as ImageModelDto);
     setIsJsonValid(isValid);
   };
 
@@ -53,7 +53,7 @@ const ImageCreatePage: React.FC = () => {
             <JsonEditor
               id="imageJsonEditor"
               label="Image Metadata (JSON)"
-              value={formData}
+              value={formData as unknown as Record<string, unknown>}
               onChange={handleJsonChange}
               rows={20}
             />

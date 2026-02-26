@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { projectApi } from '../../api/project';
-import type { ProjectDto } from '../../api/types';
+import type { ProjectDto, ApiError } from '../../api/types';
 import Button from '../../components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 import JsonEditor from '../../components/ui/JsonEditor';
@@ -15,7 +15,7 @@ const ProjectEditPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
 
-  const [formData, setFormData] = useState<ProjectDto>({});
+  const [formData, setFormData] = useState<ProjectDto>({ title: '', description: '' });
   const [isJsonValid, setIsJsonValid] = useState<boolean>(true);
 
   const {
@@ -35,21 +35,21 @@ const ProjectEditPage: React.FC = () => {
     }
   }, [initialData]);
 
-  const updateProjectMutation = useMutation<ProjectDto, AxiosError, { id: string, data: ProjectDto }>({
+  const updateProjectMutation = useMutation<ProjectDto, AxiosError<ApiError>, { id: string, data: ProjectDto }>({
     mutationFn: ({ id, data }) => projectApi.update(id, data),
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success(`Project entry with ID: ${id} updated successfully!`);
       queryClient.invalidateQueries({ queryKey: ['project', id] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       navigate(`/projects/${id}`);
     },
-    onError: (error) => {
+    onError: (error: AxiosError<ApiError>) => {
       toast.error(`Failed to update project entry: ${error.response?.data?.message || error.message}`);
     },
   });
 
   const handleJsonChange = (value: Record<string, unknown>, isValid: boolean) => {
-    setFormData(value);
+    setFormData(value as ProjectDto);
     setIsJsonValid(isValid);
   };
 
@@ -93,7 +93,7 @@ const ProjectEditPage: React.FC = () => {
             <JsonEditor
               id="projectJsonEditor"
               label="Project Data (JSON)"
-              value={formData}
+              value={formData as unknown as Record<string, unknown>}
               onChange={handleJsonChange}
               rows={20}
             />
