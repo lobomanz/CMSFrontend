@@ -11,6 +11,7 @@ const Sidebar: React.FC = () => {
     { name: 'Upload Image', path: '/images/upload' },
     { name: 'Projects', path: '/projects' },
     { name: 'Admin-only', path: '/admin-only' },
+    { name: 'Preview Sites', path: '/preview-sites' },
   ];
 
   return (
