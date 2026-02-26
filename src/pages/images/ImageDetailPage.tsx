@@ -65,7 +65,7 @@ const ImageDetailPage: React.FC = () => {
           )}
           <JsonEditor
             id="imageJsonView"
-            value={imageData}
+            value={imageData as unknown as Record<string, unknown>}
             onChange={() => {}} // Read-only view
             rows={15}
             className="bg-gray-50 p-3 rounded-md"
