@@ -10,7 +10,7 @@ import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../../components/ui/Modal';
 import { AxiosError } from 'axios';
-import type { AboutUsDto, ApiError } from '../../api/types';
+import type { ApiError } from '../../api/types';
 
 
 const ProjectListPage: React.FC = () => {
