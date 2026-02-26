@@ -1,7 +1,7 @@
 import { api } from './axios';
 import type { ImageModelDto } from './types';
 
-const IMAGE_URL = '/Image';
+const IMAGE_URL = '/api/Image';
 
 export const imageApi = {
   upload: (data: FormData) => api.upload<FormData, ImageModelDto>(`${IMAGE_URL}/upload`, data),

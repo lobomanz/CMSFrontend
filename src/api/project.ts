@@ -1,7 +1,7 @@
 import { api } from './axios';
 import type { ProjectDto } from './types';
 
-const PROJECT_URL = '/Project';
+const PROJECT_URL = '/api/Project';
 
 export const projectApi = {
   getAll: () => api.getList<ProjectDto>(PROJECT_URL),

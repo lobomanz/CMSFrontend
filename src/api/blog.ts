@@ -1,7 +1,7 @@
 import { api } from './axios';
 import type { BlogDto } from './types';
 
-const BLOG_URL = '/Blog';
+const BLOG_URL = '/api/Blog';
 
 export const blogApi = {
   getAll: () => api.getList<BlogDto>(BLOG_URL),
