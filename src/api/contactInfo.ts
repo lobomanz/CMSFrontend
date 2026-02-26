@@ -1,7 +1,7 @@
 import { api } from './axios';
 import type { ContactInfoDto } from './types';
 
-const CONTACT_INFO_URL = '/api/ContactInfo';
+const CONTACT_INFO_URL = '/ContactInfo';
 
 export const contactInfoApi = {
   get: () => api.getList<ContactInfoDto>(CONTACT_INFO_URL).then(res => res[0]), // Assuming it returns a single item in an array

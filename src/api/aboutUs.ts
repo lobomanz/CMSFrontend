@@ -1,7 +1,7 @@
 import { api } from './axios';
 import type { AboutUsDto } from './types';
 
-const ABOUT_US_URL = '/api/AboutUs';
+const ABOUT_US_URL = '/AboutUs';
 
 export const aboutUsApi = {
   getById: (id: string | number) => api.getOne<AboutUsDto>(ABOUT_US_URL, id),
