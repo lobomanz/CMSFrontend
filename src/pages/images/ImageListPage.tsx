@@ -10,6 +10,8 @@ import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../../components/ui/Modal';
 import { AxiosError } from 'axios';
+import type { AboutUsDto, ApiError } from '../../api/types';
+
 
 const ImageListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -27,7 +29,7 @@ const ImageListPage: React.FC = () => {
     queryFn: imageApi.getAll,
   });
 
-  const deleteImageMutation = useMutation<void, AxiosError, number>({
+  const deleteImageMutation = useMutation<void, AxiosError<ApiError>, number>({
     mutationFn: imageApi.remove,
     onSuccess: () => {
       toast.success('Image deleted successfully!');

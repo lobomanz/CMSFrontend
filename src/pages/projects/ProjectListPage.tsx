@@ -10,6 +10,8 @@ import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../../components/ui/Modal';
 import { AxiosError } from 'axios';
+import type { AboutUsDto, ApiError } from '../../api/types';
+
 
 const ProjectListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -27,7 +29,7 @@ const ProjectListPage: React.FC = () => {
     queryFn: projectApi.getAll,
   });
 
-  const deleteProjectMutation = useMutation<void, AxiosError, number>({
+  const deleteProjectMutation = useMutation<void, AxiosError<ApiError>, number>({
     mutationFn: projectApi.remove,
     onSuccess: () => {
       toast.success('Project deleted successfully!');

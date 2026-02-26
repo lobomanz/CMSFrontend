@@ -10,6 +10,8 @@ import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../../components/ui/Modal';
 import { AxiosError } from 'axios';
+import type { AboutUsDto, ApiError } from '../../api/types';
+
 
 const BlogListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -27,7 +29,7 @@ const BlogListPage: React.FC = () => {
     queryFn: blogApi.getAll,
   });
 
-  const deleteBlogMutation = useMutation<void, AxiosError, number>({
+  const deleteBlogMutation = useMutation<void, AxiosError<ApiError>, number>({
     mutationFn: blogApi.remove,
     onSuccess: () => {
       toast.success('Blog deleted successfully!');
