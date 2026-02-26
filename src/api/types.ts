@@ -62,3 +62,36 @@ export interface ProjectDto {
   export interface AuthResponse {
     token: string;
   }
+
+  export type Guid = string;
+
+export interface PreviewSiteDto {
+  id: Guid;
+  name: string;
+  slug: string;
+  description?: string | null;
+  logoUrl?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MiniProjectSectionDto {
+  heading: string;
+  paragraph: string;
+}
+
+export interface MiniProjectDto {
+  id: Guid;
+  previewSiteId: Guid;
+  title: string;
+  sections: MiniProjectSectionDto[]; // exactly 3
+  galleryImageUrls: string[];
+  sortOrder?: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReorderMiniProjectsDto {
+  projectId: Guid;
+  sortOrder: number;
+}

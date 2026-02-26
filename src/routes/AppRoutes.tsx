@@ -33,67 +33,74 @@ import ProjectListPage from '../pages/projects/ProjectListPage';
 import ProjectDetailPage from '../pages/projects/ProjectDetailPage';
 import ProjectEditPage from '../pages/projects/ProjectEditPage';
 import ProjectCreatePage from '../pages/projects/ProjectCreatePage';
-import { useAuthStore } from '../auth/useAuth';
 
+import { useAuthStore } from '../auth/useAuth';
 import AdminOnlyPage from '../pages/AdminOnlyPage';
 
+// ✅ Preview Sites (match the 2-page setup)
+import PreviewSitesPage from '../pages/preview-sites/PreviewSitesPage';
+import PreviewSiteEditPage from '../pages/preview-sites/PreviewSiteEditPage';
 
 const AppRoutes: React.FC = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
 
   return (
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
 
-        {/* Redirect from root based on auth status */}
-        <Route
-          path="/"
-          element={isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />}
-        />
+      {/* Redirect from root based on auth status */}
+      <Route
+        path="/"
+        element={isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />}
+      />
 
-        {/* Protected Routes */}
-        <Route element={<ProtectedRoute />}>
-          <Route element={<AppLayout />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
+      {/* Protected Routes */}
+      <Route element={<ProtectedRoute />}>
+        <Route element={<AppLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
 
-            {/* About Us Routes */}
-            <Route path="/about-us" element={<AboutUsDetailPage />} /> {/* Assuming detail page is the primary view */}
-            <Route path="/about-us/create" element={<AboutUsCreatePage />} />
-            <Route path="/about-us/:id" element={<AboutUsDetailPage />} />
-            <Route path="/about-us/:id/edit" element={<AboutUsEditPage />} />
+          {/* About Us Routes */}
+          <Route path="/about-us" element={<AboutUsDetailPage />} />
+          <Route path="/about-us/create" element={<AboutUsCreatePage />} />
+          <Route path="/about-us/:id" element={<AboutUsDetailPage />} />
+          <Route path="/about-us/:id/edit" element={<AboutUsEditPage />} />
 
-            {/* Blog Routes */}
-            <Route path="/blogs" element={<BlogListPage />} />
-            <Route path="/blogs/create" element={<BlogCreatePage />} />
-            <Route path="/blogs/:id" element={<BlogDetailPage />} />
-            <Route path="/blogs/:id/edit" element={<BlogEditPage />} />
+          {/* Blog Routes */}
+          <Route path="/blogs" element={<BlogListPage />} />
+          <Route path="/blogs/create" element={<BlogCreatePage />} />
+          <Route path="/blogs/:id" element={<BlogDetailPage />} />
+          <Route path="/blogs/:id/edit" element={<BlogEditPage />} />
 
-            {/* Contact Info Routes */}
-            <Route path="/contact-info" element={<ContactInfoPage />} />
+          {/* Contact Info Routes */}
+          <Route path="/contact-info" element={<ContactInfoPage />} />
 
-            {/* Image Routes */}
-            <Route path="/images" element={<ImageListPage />} />
-            <Route path="/images/upload" element={<ImageUploadPage />} />
-            <Route path="/images/create" element={<ImageCreatePage />} /> {/* For creating metadata without upload */}
-            <Route path="/images/:id" element={<ImageDetailPage />} />
-            <Route path="/images/:id/edit" element={<ImageEditPage />} />
+          {/* Image Routes */}
+          <Route path="/images" element={<ImageListPage />} />
+          <Route path="/images/upload" element={<ImageUploadPage />} />
+          <Route path="/images/create" element={<ImageCreatePage />} />
+          <Route path="/images/:id" element={<ImageDetailPage />} />
+          <Route path="/images/:id/edit" element={<ImageEditPage />} />
 
-            {/* Project Routes */}
-            <Route path="/projects" element={<ProjectListPage />} />
-            <Route path="/projects/create" element={<ProjectCreatePage />} />
-            <Route path="/projects/:id" element={<ProjectDetailPage />} />
-            <Route path="/projects/:id/edit" element={<ProjectEditPage />} />
+          {/* Project Routes */}
+          <Route path="/projects" element={<ProjectListPage />} />
+          <Route path="/projects/create" element={<ProjectCreatePage />} />
+          <Route path="/projects/:id" element={<ProjectDetailPage />} />
+          <Route path="/projects/:id/edit" element={<ProjectEditPage />} />
 
-            {/* Admin Only Route */}
-            <Route path="/admin-only" element={<AdminOnlyPage />} />
-          </Route>
+          {/* ✅ Preview Sites Routes (NEW, 2 pages) */}
+          <Route path="/preview-sites" element={<PreviewSitesPage />} />
+          <Route path="/preview-sites/:id" element={<PreviewSiteEditPage />} />
+
+          {/* Admin Only Route */}
+          <Route path="/admin-only" element={<AdminOnlyPage />} />
         </Route>
+      </Route>
 
-        {/* Catch-all for unknown routes */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      {/* Catch-all for unknown routes */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 };
 
