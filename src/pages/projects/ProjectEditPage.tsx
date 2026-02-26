@@ -49,7 +49,7 @@ const ProjectEditPage: React.FC = () => {
   });
 
   const handleJsonChange = (value: Record<string, unknown>, isValid: boolean) => {
-    setFormData(value as ProjectDto);
+    setFormData(value as unknown as ProjectDto);
     setIsJsonValid(isValid);
   };
 
