@@ -1,8 +1,18 @@
 import { api } from './axios';
-import type { UserDto, RegisterDto, AuthResponse } from './types';
+import type { UserDto, RegisterDto } from './types';
 
 export const authApi = {
-  login: (credentials: UserDto) => api.create<UserDto, AuthResponse>('/api/Auth/login', credentials),
-  register: (userData: RegisterDto) => api.create<RegisterDto, any>('/api/Auth/register', userData),
-  adminOnly: () => api.getList<any>('/Auth/admin-only'), // Assuming admin-only returns a simple message or status
+  login: (username: string, password: string) => 
+    api.create<UserDto, string>('/api/auth/login', { username, password }),
+  
+  register: (username: string, password: string) => {
+    const registerData: RegisterDto = {
+      username,
+      password,
+      confirmPassword: password,
+      role: 'Basic',
+      isActive: true,
+    };
+    return api.create<RegisterDto, void>('/api/auth/register', registerData);
+  },
 };

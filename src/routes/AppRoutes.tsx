@@ -35,14 +35,14 @@ import ProjectEditPage from '../pages/projects/ProjectEditPage';
 import ProjectCreatePage from '../pages/projects/ProjectCreatePage';
 
 import { useAuthStore } from '../auth/useAuth';
-import AdminOnlyPage from '../pages/AdminOnlyPage';
+import type { AuthState } from '../auth/useAuth';
 
 // ✅ Preview Sites (match the 2-page setup)
 import PreviewSitesPage from '../pages/preview-sites/PreviewSitesPage';
 import PreviewSiteEditPage from '../pages/preview-sites/PreviewSiteEditPage';
 
 const AppRoutes: React.FC = () => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
+  const isAuthenticated = useAuthStore((state: AuthState) => state.isAuthenticated());
 
   return (
     <Routes>
@@ -93,8 +93,7 @@ const AppRoutes: React.FC = () => {
           <Route path="/preview-sites" element={<PreviewSitesPage />} />
           <Route path="/preview-sites/:id" element={<PreviewSiteEditPage />} />
 
-          {/* Admin Only Route */}
-          <Route path="/admin-only" element={<AdminOnlyPage />} />
+
         </Route>
       </Route>
 

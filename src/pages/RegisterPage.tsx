@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../api/auth';
-import type { RegisterDto } from '../api/types';
+
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
@@ -15,8 +15,6 @@ const registerSchema = z.object({
   username: z.string().min(1, 'Username is required'),
   password: z.string().min(6, 'Password must be at least 6 characters long'),
   confirmPassword: z.string().min(1, 'Confirm password is required'),
-  role: z.enum(['Admin', 'Basic']),
-  isActive: z.boolean(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword'],
@@ -33,16 +31,11 @@ const RegisterPage: React.FC = () => {
     formState: { errors, isSubmitting },
   } = useForm<RegisterFormInputs>({
     resolver: zodResolver(registerSchema),
-    defaultValues: {
-      role: 'Basic',
-      isActive: true,
-    },
   });
 
   const onSubmit = async (data: RegisterFormInputs) => {
     try {
-      // data already matches RegisterDto shape
-      await authApi.register(data as RegisterDto);
+      await authApi.register(data.username, data.password);
       toast.success('Registration successful! Please log in.');
       navigate('/login');
     } catch (error) {
@@ -98,33 +91,6 @@ const RegisterPage: React.FC = () => {
             {errors.confirmPassword && (
               <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>
             )}
-          </div>
-
-          {/* Role */}
-          <div>
-            <select
-              {...register('role')}
-              className={`w-full border rounded px-3 py-2 ${errors.role ? 'border-red-500' : ''}`}
-            >
-              <option value="Basic">Basic</option>
-              <option value="Admin">Admin</option>
-            </select>
-            {errors.role && (
-              <p className="text-red-500 text-sm mt-1">{errors.role.message}</p>
-            )}
-          </div>
-
-          {/* IsActive */}
-          <div className="flex items-center gap-2">
-            <input
-              id="isActive"
-              type="checkbox"
-              {...register('isActive')}
-              className="h-4 w-4"
-            />
-            <label htmlFor="isActive" className="text-sm text-gray-700">
-              Active
-            </label>
           </div>
 
           <Button type="submit" disabled={isSubmitting} className="w-full">

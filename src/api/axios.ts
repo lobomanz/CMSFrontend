@@ -2,7 +2,7 @@ import axios, { type AxiosInstance } from 'axios';
 import { useAuthStore } from '../auth/useAuth'; // Assuming zustand store for auth
 
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7123/api';
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,

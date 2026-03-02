@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../auth/useAuth';
 import { authApi } from '../api/auth';
-import type { UserDto } from '../api/types';
+
 import Input from '../components/ui/Input';
 import Button from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
@@ -33,8 +33,8 @@ const LoginPage: React.FC = () => {
 
   const onSubmit = async (data: LoginFormInputs) => {
     try {
-      const response = await authApi.login(data as UserDto);
-      const { token } = response;
+      const response = await authApi.login(data.username, data.password);
+      const token = response;
       // Assuming the API returns some user info along with the token,
       // or we can fetch it after successful login if needed.
       // For now, let's just store the username.

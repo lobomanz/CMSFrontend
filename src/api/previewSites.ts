@@ -7,7 +7,7 @@ import type {
   Guid,
 } from "../api/types";
 
-const base = "/api/PreviewSites"; // because your controller route is api/[controller] => /api/PreviewSites
+const base = "/api/PreviewSites"; // because your controller route is api/[controller] => /api/preview-sites
 
 function buildPreviewSiteFormData(input: {
   name?: string;
