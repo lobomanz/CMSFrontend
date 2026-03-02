@@ -95,3 +95,21 @@ export interface ReorderMiniProjectsDto {
   projectId: Guid;
   sortOrder: number;
 }
+
+// New types for unified creation flow
+export type MiniProjectSectionData = MiniProjectSectionDto; // Alias, as they are identical
+
+export interface MiniProjectData {
+  title: string;
+  sections: MiniProjectSectionData[]; // required, exactly 3 items
+  galleryFiles: File[];
+  sortOrder: number | null;
+}
+
+export interface PreviewSiteCreationData {
+  name: string;
+  slug: string;
+  description?: string;
+  logoFile?: File | null;
+  miniProjects?: MiniProjectData[];
+}

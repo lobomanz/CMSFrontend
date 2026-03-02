@@ -5,6 +5,7 @@ import type {
   MiniProjectSectionDto,
   ReorderMiniProjectsDto,
   Guid,
+  PreviewSiteCreationData,
 } from "../api/types";
 
 const base = "/api/PreviewSites"; // because your controller route is api/[controller] => /api/preview-sites
@@ -80,6 +81,32 @@ export const previewSitesApi = {
       .then((r) => r.data),
 
   remove: (id: Guid) => axiosInstance.delete(`${base}/${id}`).then((r) => r.data),
+
+  // New unified creation method
+  createWithMiniProjects: async (input: PreviewSiteCreationData): Promise<PreviewSiteDto> => {
+    // 1. Validate miniProjects sections length
+    if (input.miniProjects) {
+      for (const miniProject of input.miniProjects) {
+        if (miniProject.sections.length !== 3) {
+          throw new Error(`Mini-project "${miniProject.title}" must have exactly 3 sections.`);
+        }
+      }
+    }
+
+    // 2. Create the preview site
+    const { name, slug, description, logoFile } = input;
+    const newSite = await previewSitesApi.create({ name, slug, description, logoFile });
+
+    // 3. Sequentially create mini-projects if they exist
+    if (input.miniProjects && input.miniProjects.length > 0) {
+      for (const miniProject of input.miniProjects) {
+        await previewSitesApi.createMiniProject(newSite.id, miniProject);
+      }
+    }
+
+    // 4. Re-fetch the site to include mini-projects
+    return previewSitesApi.get(newSite.id);
+  },
 
   // MiniProjects (nested)
   listMiniProjects: (siteId: Guid, params?: { pageNumber?: number; pageSize?: number; searchTerm?: string }) =>
