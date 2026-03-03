@@ -40,7 +40,7 @@ const LoginPage: React.FC = () => {
       // For now, let's just store the username.
       login(token, { username: data.username });
       toast.success('Login successful!');
-      navigate('/dashboard');
+      navigate('/preview-sites');
     } catch (error) {
       if (error instanceof AxiosError && error.response) {
         toast.error(error.response.data.message || 'Login failed. Please check your credentials.');
