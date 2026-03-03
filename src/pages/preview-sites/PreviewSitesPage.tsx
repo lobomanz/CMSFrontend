@@ -7,13 +7,9 @@ import { z } from "zod";
 import { toast } from "react-hot-toast";
 
 import { previewSitesApi } from "../../api/previewSites";
-import type {
-  PreviewSiteDto,
-  PreviewSiteCreationData,
-} from "../../api/types";
-import Input from "../../components/ui/Input";
-import Button from "../../components/ui/Button";
-import { Card } from "../../components/ui/Card";
+import type { PreviewSiteDto, PreviewSiteCreationData } from "../../api/types";
+
+import styles from "./PreviewSitesPage.module.css";
 
 // --- Zod Schemas ---
 const miniProjectSectionSchema = z.object({
@@ -24,21 +20,15 @@ const miniProjectSectionSchema = z.object({
 const miniProjectSchema = z.object({
   title: z.string().min(1, "Title is required"),
   sections: z.array(miniProjectSectionSchema).length(3, "Exactly 3 sections are required"),
-  galleryFiles: z
-    .instanceof(FileList)
-    .refine((fileList) => fileList.length > 0, "At least one gallery file is required")
-    .optional(),
-  sortOrder: z.number().int().nullable().optional(), // Updated to allow null
+  galleryFiles: z.instanceof(FileList).optional(),
+  sortOrder: z.number().int().nullable().optional(),
 });
 
 const previewSiteCreationSchema = z.object({
   name: z.string().min(1, "Name is required"),
   slug: z.string().min(1, "Slug is required"),
   description: z.string().optional(),
-  logoFile: z
-    .instanceof(FileList)
-    .refine((fileList) => fileList.length > 0, "Logo file is required")
-    .optional(),
+  logoFile: z.instanceof(FileList).optional(),
   miniProjects: z.array(miniProjectSchema).optional(),
 });
 
@@ -48,7 +38,7 @@ const PreviewSitesPage: React.FC = () => {
   const qc = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, isFetching } = useQuery({
     queryKey: ["previewSites", { searchTerm }],
     queryFn: () => previewSitesApi.list({ pageNumber: 1, pageSize: 50, searchTerm: searchTerm || undefined }),
   });
@@ -71,11 +61,7 @@ const PreviewSitesPage: React.FC = () => {
     },
   });
 
-  const {
-    fields: miniProjectFields,
-    append: appendMiniProject,
-    remove: removeMiniProject,
-  } = useFieldArray({
+  const { fields: miniProjectFields, append: appendMiniProject, remove: removeMiniProject } = useFieldArray({
     control,
     name: "miniProjects",
   });
@@ -84,7 +70,7 @@ const PreviewSitesPage: React.FC = () => {
     mutationFn: (data: PreviewSiteCreationData) => previewSitesApi.createWithMiniProjects(data),
     onSuccess: () => {
       toast.success("Preview site created successfully!");
-      reset(); // Reset the form fields after successful submission
+      reset();
       qc.invalidateQueries({ queryKey: ["previewSites"] });
     },
     onError: (e: any) => {
@@ -103,214 +89,287 @@ const PreviewSitesPage: React.FC = () => {
   });
 
   const onSubmit = (data: PreviewSiteFormInputs) => {
-    // Convert FileList to File for logoFile and galleryFiles
     const submissionData: PreviewSiteCreationData = {
       ...data,
       logoFile: data.logoFile?.[0] ?? null,
       miniProjects: data.miniProjects?.map((mp) => ({
         ...mp,
         galleryFiles: Array.from(mp.galleryFiles || []),
-        sortOrder: mp.sortOrder === undefined ? null : mp.sortOrder, // Fix: convert undefined to null for sortOrder
+        sortOrder: mp.sortOrder === undefined ? null : mp.sortOrder,
       })),
     };
     createMut.mutate(submissionData);
   };
 
   return (
-    <div className="space-y-6">
-      <Card className="p-4">
-        <h1 className="text-xl font-semibold">Preview Sites</h1>
+    <div className={styles.page}>
+      <div className={styles.container}>
+        {/* Header */}
+        <div className={styles.header}>
+          <div>
+            <h1 className={styles.title}>Preview Sites</h1>
+            <p className={styles.subtitle}>Create and manage preview sites and their mini-projects.</p>
+          </div>
 
-        <div className="mt-4 flex gap-2">
-          <Input
-            id="searchTerm" // Added id
-            className="w-full"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <div className={styles.headerRight}>
+            <span className={styles.pill}>Total: {sites.length}</span>
+            {isFetching && <span className={styles.mutedSmall}>Refreshing…</span>}
+          </div>
         </div>
 
-        {isLoading && <p className="mt-4 text-sm text-gray-600">Loading...</p>}
-        {error && <p className="mt-4 text-sm text-red-600">Failed to load sites.</p>}
+        {/* List */}
+        <section className={styles.card}>
+          <div className={styles.cardHeaderRow}>
+            <div>
+              <h2 className={styles.cardTitle}>All sites</h2>
+              <p className={styles.cardSub}>Search, open, or delete preview sites.</p>
+            </div>
+          </div>
 
-        <div className="mt-4 divide-y">
-          {sites.map((s: PreviewSiteDto) => (
-            <div key={s.id} className="py-3 flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <div className="flex items-center gap-3">
-                  {s.logoUrl ? (
-                    <img src={s.logoUrl} alt={s.name} className="w-10 h-10 rounded object-cover border" />
-                  ) : (
-                    <div className="w-10 h-10 rounded border bg-gray-50" />
-                  )}
-                  <div className="min-w-0">
-                    <p className="font-medium truncate">{s.name}</p>
-                    <p className="text-sm text-gray-600 truncate">/{s.slug}</p>
+          <div className={styles.cardBody}>
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="searchTerm">
+                Search
+              </label>
+              <input
+                id="searchTerm"
+                className={styles.input}
+                placeholder="Search by name, slug…"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            {isLoading && <p className={styles.stateText}>Loading…</p>}
+            {error && <p className={styles.stateTextError}>Failed to load sites.</p>}
+
+            <div className={styles.list}>
+              {sites.map((s: PreviewSiteDto) => (
+                <div key={s.id} className={styles.listRow}>
+                  <div className={styles.listMain}>
+                    <div className={styles.siteLine}>
+                      {s.logoUrl ? (
+                        <img src={s.logoUrl} alt={s.name} className={styles.siteLogo} />
+                      ) : (
+                        <div className={styles.siteLogoPlaceholder} />
+                      )}
+                      <div className={styles.siteText}>
+                        <div className={styles.siteName}>{s.name}</div>
+                        <div className={styles.siteSlug}>/{s.slug}</div>
+                      </div>
+                    </div>
+
+                    {s.description && <div className={styles.siteDesc}>{s.description}</div>}
+                  </div>
+
+                  <div className={styles.rowActions}>
+                    <Link to={`/admin/preview-sites/${s.id}`} className={styles.btnPrimaryLink}>
+                      Edit
+                    </Link>
+
+                    <button
+                      className={styles.btnDanger}
+                      onClick={() => {
+                        const ok = window.confirm(`Delete "${s.name}"? This cannot be undone.`);
+                        if (ok) deleteMut.mutate(s.id);
+                      }}
+                      disabled={deleteMut.isPending}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
-                {s.description && <p className="text-sm text-gray-700 mt-1">{s.description}</p>}
-              </div>
+              ))}
 
-              <div className="flex items-center gap-2 shrink-0">
-                <Link
-                  to={`/admin/preview-sites/${s.id}`}
-                  className="px-3 py-2 rounded-md bg-black text-white text-sm"
-                >
-                  Edit
-                </Link>
-                <Button
-                  className="bg-red-600 text-white text-sm"
-                  onClick={() => deleteMut.mutate(s.id)}
-                >
-                  Delete
-                </Button>
-              </div>
+              {!isLoading && sites.length === 0 && <div className={styles.empty}>No preview sites found.</div>}
             </div>
-          ))}
+          </div>
+        </section>
 
-          {!isLoading && sites.length === 0 && (
-            <p className="py-6 text-sm text-gray-600">No preview sites found.</p>
-          )}
-        </div>
-      </Card>
-
-      <Card className="p-4 space-y-4">
-        <h2 className="text-lg font-semibold">Create New Preview Site</h2>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Main Site Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Create */}
+        <section className={styles.card}>
+          <div className={styles.cardHeaderRow}>
             <div>
-              <Input id="name" placeholder="Name" {...register("name")} />
-              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
+              <h2 className={styles.cardTitle}>Create new preview site</h2>
+              <p className={styles.cardSub}>Optionally include mini-projects at creation time.</p>
             </div>
-            <div>
-              <Input id="slug" placeholder="Slug (unique)" {...register("slug")} />
-              {errors.slug && <p className="text-red-500 text-sm mt-1">{errors.slug.message}</p>}
-            </div>
-          </div>
-          <div>
-            <textarea
-              id="description" // Added id
-              className="border rounded-md p-2 w-full"
-              placeholder="Description (optional)"
-              rows={3}
-              {...register("description")}
-            />
-            {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
-          </div>
-          <div>
-            <label htmlFor="logoFile" className="text-sm text-gray-700 block mb-1">Logo (optional)</label>
-            <Input id="logoFile" type="file" accept="image/*" {...register("logoFile")} />
-            {errors.logoFile && <p className="text-red-500 text-sm mt-1">{errors.logoFile.message}</p>}
           </div>
 
-          {/* Mini-Projects Section */}
-          <div className="space-y-4 pt-4 border-t">
-            <h3 className="text-md font-semibold">Mini-Projects (Optional)</h3>
-            {miniProjectFields.map((item, mpIndex) => (
-              <div key={item.id} className="p-3 border rounded-md space-y-3 relative">
-                <Button
-                  type="button"
-                  onClick={() => removeMiniProject(mpIndex)}
-                  className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full text-xs"
-                >
-                  X
-                </Button>
-                <div>
-                  <Input
-                    id={`miniProjects.${mpIndex}.title`} // Added id
-                    placeholder={`Mini-Project ${mpIndex + 1} Title`}
-                    {...register(`miniProjects.${mpIndex}.title`)}
-                  />
-                  {errors.miniProjects?.[mpIndex]?.title && (
-                    <p className="text-red-500 text-sm mt-1">{errors.miniProjects[mpIndex]?.title?.message}</p>
-                  )}
-                </div>
-                <div>
-                  <Input
-                    id={`miniProjects.${mpIndex}.sortOrder`} // Added id
-                    type="number"
-                    placeholder={`Mini-Project ${mpIndex + 1} Sort Order (optional)`}
-                    {...register(`miniProjects.${mpIndex}.sortOrder`, { valueAsNumber: true })}
-                  />
-                  {errors.miniProjects?.[mpIndex]?.sortOrder && (
-                    <p className="text-red-500 text-sm mt-1">{errors.miniProjects[mpIndex]?.sortOrder?.message}</p>
-                  )}
+          <div className={styles.cardBody}>
+            <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+              <div className={styles.grid2}>
+                <div className={styles.field}>
+                  <label className={styles.label} htmlFor="name">
+                    Name
+                  </label>
+                  <input id="name" className={styles.input} placeholder="e.g. ACME Studio" {...register("name")} />
+                  {errors.name && <div className={styles.error}>{errors.name.message}</div>}
                 </div>
 
-                <div className="space-y-2 pl-2 border-l">
-                  <p className="text-sm font-medium">Sections (exactly 3)</p>
-                  {Array.from({ length: 3 }).map((_, secIndex) => (
-                    <div key={secIndex} className="space-y-1">
-                      <Input
-                        id={`miniProjects.${mpIndex}.sections.${secIndex}.heading`} // Added id
-                        placeholder={`Section ${secIndex + 1} Heading`}
-                        {...register(`miniProjects.${mpIndex}.sections.${secIndex}.heading`)}
-                      />
-                      {errors.miniProjects?.[mpIndex]?.sections?.[secIndex]?.heading && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.miniProjects[mpIndex]?.sections?.[secIndex]?.heading?.message}
-                        </p>
+                <div className={styles.field}>
+                  <label className={styles.label} htmlFor="slug">
+                    Slug
+                  </label>
+                  <input id="slug" className={styles.input} placeholder="e.g. acme-studio" {...register("slug")} />
+                  {errors.slug && <div className={styles.error}>{errors.slug.message}</div>}
+                </div>
+              </div>
+
+              <div className={styles.field}>
+                <label className={styles.label} htmlFor="description">
+                  Description (optional)
+                </label>
+                <textarea
+                  id="description"
+                  className={styles.textarea}
+                  rows={4}
+                  placeholder="Short description…"
+                  {...register("description")}
+                />
+                {errors.description && <div className={styles.error}>{errors.description.message}</div>}
+              </div>
+
+              <div className={styles.field}>
+                <label className={styles.label} htmlFor="logoFile">
+                  Logo (optional)
+                </label>
+                <input id="logoFile" className={styles.file} type="file" accept="image/*" {...register("logoFile")} />
+                {errors.logoFile && <div className={styles.error}>{errors.logoFile.message}</div>}
+              </div>
+
+              {/* Mini projects */}
+              <div className={styles.block}>
+                <div className={styles.blockHead}>
+                  <div>
+                    <div className={styles.blockTitle}>Mini-projects (optional)</div>
+                    <div className={styles.blockSub}>Each mini-project requires exactly 3 sections.</div>
+                  </div>
+
+                  <button
+                    type="button"
+                    className={styles.btnPrimary}
+                    onClick={() =>
+                      appendMiniProject({
+                        title: "",
+                        sections: [
+                          { heading: "", paragraph: "" },
+                          { heading: "", paragraph: "" },
+                          { heading: "", paragraph: "" },
+                        ],
+                        sortOrder: null,
+                      })
+                    }
+                  >
+                    Add mini-project
+                  </button>
+                </div>
+
+                <div className={styles.stack}>
+                  {miniProjectFields.map((item, mpIndex) => (
+                    <div key={item.id} className={styles.mpCard}>
+                      <div className={styles.mpHead}>
+                        <div>
+                          <div className={styles.mpTitle}>Mini-project {mpIndex + 1}</div>
+                          <div className={styles.mpSub}>Configure title, sort order, sections, and optional gallery.</div>
+                        </div>
+                        <button type="button" className={styles.iconBtn} onClick={() => removeMiniProject(mpIndex)} title="Remove">
+                          ×
+                        </button>
+                      </div>
+
+                      <div className={styles.grid2}>
+                        <div className={styles.field}>
+                          <label className={styles.label}>Title</label>
+                          <input className={styles.input} {...register(`miniProjects.${mpIndex}.title`)} />
+                          {errors.miniProjects?.[mpIndex]?.title && (
+                            <div className={styles.error}>{errors.miniProjects[mpIndex]?.title?.message}</div>
+                          )}
+                        </div>
+
+                        <div className={styles.field}>
+                          <label className={styles.label}>Sort order (optional)</label>
+                          <input
+                            className={styles.input}
+                            type="number"
+                            {...register(`miniProjects.${mpIndex}.sortOrder`, { valueAsNumber: true })}
+                          />
+                          {errors.miniProjects?.[mpIndex]?.sortOrder && (
+                            <div className={styles.error}>{errors.miniProjects[mpIndex]?.sortOrder?.message}</div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className={styles.grid3}>
+                        {Array.from({ length: 3 }).map((_, secIndex) => (
+                          <div key={secIndex} className={styles.panel}>
+                            <div className={styles.panelHeader}>
+                              <div className={styles.panelTitle}>Section {secIndex + 1}</div>
+                              <span className={styles.pill}>#{secIndex + 1}</span>
+                            </div>
+
+                            <div className={styles.field}>
+                              <label className={styles.label}>Heading</label>
+                              <input className={styles.input} {...register(`miniProjects.${mpIndex}.sections.${secIndex}.heading`)} />
+                              {errors.miniProjects?.[mpIndex]?.sections?.[secIndex]?.heading && (
+                                <div className={styles.error}>
+                                  {errors.miniProjects[mpIndex]?.sections?.[secIndex]?.heading?.message}
+                                </div>
+                              )}
+                            </div>
+
+                            <div className={styles.field}>
+                              <label className={styles.label}>Paragraph</label>
+                              <textarea
+                                className={styles.textarea}
+                                rows={4}
+                                {...register(`miniProjects.${mpIndex}.sections.${secIndex}.paragraph`)}
+                              />
+                              {errors.miniProjects?.[mpIndex]?.sections?.[secIndex]?.paragraph && (
+                                <div className={styles.error}>
+                                  {errors.miniProjects[mpIndex]?.sections?.[secIndex]?.paragraph?.message}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {errors.miniProjects?.[mpIndex]?.sections && (
+                        <div className={styles.error}>{errors.miniProjects[mpIndex]?.sections?.message as string}</div>
                       )}
-                      <textarea
-                        id={`miniProjects.${mpIndex}.sections.${secIndex}.paragraph`} // Added id
-                        className="border rounded-md p-2 w-full text-sm"
-                        placeholder={`Section ${secIndex + 1} Paragraph`}
-                        rows={2}
-                        {...register(`miniProjects.${mpIndex}.sections.${secIndex}.paragraph`)}
-                      />
-                      {errors.miniProjects?.[mpIndex]?.sections?.[secIndex]?.paragraph && (
-                        <p className="text-red-500 text-sm mt-1">
-                          {errors.miniProjects[mpIndex]?.sections?.[secIndex]?.paragraph?.message}
-                        </p>
-                      )}
+
+                      <div className={styles.field}>
+                        <label className={styles.label}>Gallery files (optional)</label>
+                        <input className={styles.file} type="file" multiple {...register(`miniProjects.${mpIndex}.galleryFiles`)} />
+                        {errors.miniProjects?.[mpIndex]?.galleryFiles && (
+                          <div className={styles.error}>{errors.miniProjects[mpIndex]?.galleryFiles?.message}</div>
+                        )}
+                      </div>
                     </div>
                   ))}
-                  {/* Error for sections array length */}
-                  {errors.miniProjects?.[mpIndex]?.sections && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.miniProjects[mpIndex]?.sections?.message as string}
-                    </p>
-                  )}
-                </div>
 
-                <div className="pt-2">
-                  <label htmlFor={`miniProjects.${mpIndex}.galleryFiles`} className="text-sm text-gray-700 block mb-1">Gallery Files (multiple, optional)</label>
-                  <Input
-                    id={`miniProjects.${mpIndex}.galleryFiles`} // Added id
-                    type="file"
-                    multiple
-                    {...register(`miniProjects.${mpIndex}.galleryFiles`)}
-                  />
-                  {errors.miniProjects?.[mpIndex]?.galleryFiles && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors.miniProjects[mpIndex]?.galleryFiles?.message}
-                    </p>
-                  )}
+                  {miniProjectFields.length === 0 && <div className={styles.empty}>No mini-projects added yet.</div>}
                 </div>
               </div>
-            ))}
-            <Button
-              type="button"
-              onClick={() =>
-                appendMiniProject({
-                  title: "",
-                  sections: [{ heading: "", paragraph: "" }, { heading: "", paragraph: "" }, { heading: "", paragraph: "" }],
-                  sortOrder: null, // Default to null
-                })
-              }
-              className="bg-blue-500 text-white"
-            >
-              Add Mini-Project
-            </Button>
-          </div>
 
-          <Button type="submit" disabled={isSubmitting} className="w-full bg-green-600 text-white mt-4">
-            {isSubmitting ? "Creating..." : "Create Preview Site with Mini-Projects"}
-          </Button>
-        </form>
-      </Card>
+              <div className={styles.actions}>
+                <button className={styles.btnPrimary} type="submit" disabled={isSubmitting || createMut.isPending}>
+                  {isSubmitting || createMut.isPending ? "Creating…" : "Create preview site"}
+                </button>
+
+                <button
+                  className={styles.btnGhost}
+                  type="button"
+                  onClick={() => reset()}
+                  disabled={isSubmitting || createMut.isPending}
+                >
+                  Reset
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+      </div>
     </div>
   );
 };
