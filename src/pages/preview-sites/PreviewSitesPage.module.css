@@ -82,7 +82,7 @@
 .label{ font-size:13px; font-weight:700; color:#1f2937; }
 
 .input, .textarea{
-  width:100%;
+  width:calc(100% - 50px);
   font-size:14px;
   color:var(--text);
   border:1px solid var(--border);
