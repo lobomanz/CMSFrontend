@@ -143,7 +143,7 @@ const PreviewSiteEditPage: React.FC = () => {
         <div className={styles.header}>
           <div className={styles.headerLeft}>
             <div className={styles.breadcrumbs}>
-              <Link to="/admin/preview-sites" className={styles.breadcrumbLink}>
+              <Link to="/preview-sites" className={styles.breadcrumbLink}>
                 Preview Sites
               </Link>
               <span className={styles.breadcrumbSep}>/</span>

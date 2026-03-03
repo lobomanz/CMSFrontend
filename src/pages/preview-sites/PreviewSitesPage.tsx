@@ -163,7 +163,7 @@ const PreviewSitesPage: React.FC = () => {
                   </div>
 
                   <div className={styles.rowActions}>
-                    <Link to={`/admin/preview-sites/${s.id}`} className={styles.btnPrimaryLink}>
+                    <Link to={`/preview-sites/${s.id}`} className={styles.btnPrimaryLink}>
                       Edit
                     </Link>
 
