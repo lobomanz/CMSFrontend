@@ -1,148 +1,98 @@
 import axiosInstance from "./axios";
 import type {
   PreviewSiteDto,
-  MiniProjectDto,
-  MiniProjectSectionDto,
-  ReorderMiniProjectsDto,
+  PreviewSiteUpdateDto,
   Guid,
-  PreviewSiteCreationData,
+  PaginatedResponse,
 } from "../api/types";
 
-const base = "/api/PreviewSites"; // because your controller route is api/[controller] => /api/preview-sites
+const base = "/api/PreviewSites";
 
-function buildPreviewSiteFormData(input: {
-  name?: string;
-  slug?: string;
-  description?: string;
-  logoFile?: File | null;
-}) {
-  const fd = new FormData();
-  if (input.name !== undefined) fd.append("Name", input.name);
-  if (input.slug !== undefined) fd.append("Slug", input.slug);
-  if (input.description !== undefined) fd.append("Description", input.description);
-  if (input.logoFile) fd.append("Logo", input.logoFile);
-  return fd;
-}
+// Mapping dictionary for keys that don't follow standard camelCase or snake_case conventions
+const fieldMapping: Record<string, string> = {
+  contact_modal: "contactModal",
+  no_images: "noImages",
+  projects_data: "projects_Data", // Specific requirement
+  contact_us: "contactUs",
+  or_at: "orAt",
+  name_placeholder: "namePlaceholder",
+  email_placeholder: "emailPlaceholder",
+  message_placeholder: "messagePlaceholder",
+  send_button: "sendButton",
+  hero_title: "heroTitle",
+  hero_img: "heroImg",
+  section1_title: "section1Title",
+  section1_desc: "section1Desc",
+  section1_img: "section1Img",
+  section2_title: "section2Title",
+  section2_desc: "section2Desc",
+  section3_img: "section3Img",
+  section3_title1: "section3Title1",
+  section3_desc1: "section3Desc1",
+  section3_title2: "section3Title2",
+  section3_desc2: "section3Desc2",
+  text_url: "textUrl",
+};
 
-// ASP.NET Core binder expects Sections[0].Heading, Sections[0].Paragraph etc.
-function appendSections(fd: FormData, sections: MiniProjectSectionDto[]) {
-  sections.forEach((s, idx) => {
-    fd.append(`Sections[${idx}].Heading`, s.heading);
-    fd.append(`Sections[${idx}].Paragraph`, s.paragraph);
-  });
-}
+// Inverse mapping for receiving data
+const inverseMapping: Record<string, string> = Object.entries(fieldMapping).reduce(
+  (acc, [k, v]) => ({ ...acc, [v]: k }),
+  {}
+);
 
-function buildMiniProjectFormData(input: {
-  title?: string;
-  sections?: MiniProjectSectionDto[]; // if provided, must be len 3
-  galleryFiles?: File[];
-  sortOrder?: number | null;
-}) {
-  const fd = new FormData();
-  if (input.title !== undefined) fd.append("Title", input.title);
+/**
+ * Recursively maps object keys from snake_case to camelCase (or custom mapping)
+ */
+export const mapToBackend = (data: any): any => {
+  if (!data || typeof data !== "object" || data instanceof File) return data;
+  if (Array.isArray(data)) return data.map(mapToBackend);
 
-  if (input.sections !== undefined) {
-    appendSections(fd, input.sections);
+  const mapped: any = {};
+  for (const key in data) {
+    const backendKey = fieldMapping[key] || key;
+    mapped[backendKey] = mapToBackend(data[key]);
   }
+  return mapped;
+};
 
-  if (input.sortOrder !== undefined && input.sortOrder !== null) {
-    fd.append("SortOrder", String(input.sortOrder));
+/**
+ * Recursively maps object keys from camelCase to snake_case (or custom inverse mapping)
+ */
+export const mapFromBackend = (data: any): any => {
+  if (!data || typeof data !== "object") return data;
+  if (Array.isArray(data)) return data.map(mapFromBackend);
+
+  const mapped: any = {};
+  for (const key in data) {
+    const frontendKey = inverseMapping[key] || key;
+    mapped[frontendKey] = mapFromBackend(data[key]);
   }
-
-  if (input.galleryFiles?.length) {
-    input.galleryFiles.forEach((f) => fd.append("GalleryFiles", f));
-  }
-
-  return fd;
-}
+  return mapped;
+};
 
 export const previewSitesApi = {
-  // PreviewSites
   list: (params?: { pageNumber?: number; pageSize?: number; searchTerm?: string }) =>
     axiosInstance
-      .get<PreviewSiteDto[]>(base, { params })
-      .then((r) => r.data),
+      .get<PaginatedResponse<PreviewSiteDto>>(base, { params })
+      .then((r) => ({
+        ...r.data,
+        items: r.data.items.map(mapFromBackend),
+      })),
 
   get: (id: Guid) =>
-    axiosInstance.get<PreviewSiteDto>(`${base}/${id}`).then((r) => r.data),
-
-  create: (input: { name: string; slug: string; description?: string; logoFile?: File | null }) =>
     axiosInstance
-      .post<PreviewSiteDto>(base, buildPreviewSiteFormData(input), {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then((r) => r.data),
+      .get<PreviewSiteDto>(`${base}/${id}`)
+      .then((r) => mapFromBackend(r.data)),
 
-  update: (id: Guid, input: { name?: string; slug?: string; description?: string; logoFile?: File | null }) =>
+  create: (input: { slug: string; name?: string; description?: string }) =>
     axiosInstance
-      .patch<PreviewSiteDto>(`${base}/${id}`, buildPreviewSiteFormData(input), {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then((r) => r.data),
+      .post<PreviewSiteDto>(base, mapToBackend(input))
+      .then((r) => mapFromBackend(r.data)),
+
+  update: (id: Guid, input: PreviewSiteUpdateDto) =>
+    axiosInstance
+      .patch<PreviewSiteDto>(`${base}/${id}`, mapToBackend(input))
+      .then((r) => mapFromBackend(r.data)),
 
   remove: (id: Guid) => axiosInstance.delete(`${base}/${id}`).then((r) => r.data),
-
-  // New unified creation method
-  createWithMiniProjects: async (input: PreviewSiteCreationData): Promise<PreviewSiteDto> => {
-    // 1. Validate miniProjects sections length
-    if (input.miniProjects) {
-      for (const miniProject of input.miniProjects) {
-        if (miniProject.sections.length !== 3) {
-          throw new Error(`Mini-project "${miniProject.title}" must have exactly 3 sections.`);
-        }
-      }
-    }
-
-    // 2. Create the preview site
-    const { name, slug, description, logoFile } = input;
-    const newSite = await previewSitesApi.create({ name, slug, description, logoFile });
-
-    // 3. Sequentially create mini-projects if they exist
-    if (input.miniProjects && input.miniProjects.length > 0) {
-      for (const miniProject of input.miniProjects) {
-        await previewSitesApi.createMiniProject(newSite.id, miniProject);
-      }
-    }
-
-    // 4. Re-fetch the site to include mini-projects
-    return previewSitesApi.get(newSite.id);
-  },
-
-  // MiniProjects (nested)
-  listMiniProjects: (siteId: Guid, params?: { pageNumber?: number; pageSize?: number; searchTerm?: string }) =>
-    axiosInstance
-      .get<MiniProjectDto[]>(`${base}/${siteId}/mini-projects`, { params })
-      .then((r) => r.data),
-
-  getMiniProject: (siteId: Guid, projectId: Guid) =>
-    axiosInstance
-      .get<MiniProjectDto>(`${base}/${siteId}/mini-projects/${projectId}`)
-      .then((r) => r.data),
-
-  createMiniProject: (
-    siteId: Guid,
-    input: { title: string; sections: MiniProjectSectionDto[]; galleryFiles?: File[]; sortOrder?: number | null }
-  ) =>
-    axiosInstance
-      .post<MiniProjectDto>(`${base}/${siteId}/mini-projects`, buildMiniProjectFormData(input), {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then((r) => r.data),
-
-  updateMiniProject: (
-    siteId: Guid,
-    projectId: Guid,
-    input: { title?: string; sections?: MiniProjectSectionDto[]; galleryFiles?: File[]; sortOrder?: number | null }
-  ) =>
-    axiosInstance
-      .patch<MiniProjectDto>(`${base}/${siteId}/mini-projects/${projectId}`, buildMiniProjectFormData(input), {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then((r) => r.data),
-
-  deleteMiniProject: (siteId: Guid, projectId: Guid) =>
-    axiosInstance.delete(`${base}/${siteId}/mini-projects/${projectId}`).then((r) => r.data),
-
-  reorderMiniProjects: (siteId: Guid, body: ReorderMiniProjectsDto[]) =>
-    axiosInstance.patch(`${base}/${siteId}/mini-projects/reorder`, body).then((r) => r.data),
 };

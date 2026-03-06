@@ -67,49 +67,47 @@ export interface ProjectDto {
 
 export interface PreviewSiteDto {
   id: Guid;
-  name: string;
-  slug: string;
-  description?: string | null;
-  logoUrl?: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface MiniProjectSectionDto {
-  heading: string;
-  paragraph: string;
-}
-
-export interface MiniProjectDto {
-  id: Guid;
-  previewSiteId: Guid;
-  title: string;
-  sections: MiniProjectSectionDto[]; // exactly 3
-  galleryImageUrls: string[];
-  sortOrder?: number | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ReorderMiniProjectsDto {
-  projectId: Guid;
-  sortOrder: number;
-}
-
-// New types for unified creation flow
-export type MiniProjectSectionData = MiniProjectSectionDto; // Alias, as they are identical
-
-export interface MiniProjectData {
-  title: string;
-  sections: MiniProjectSectionData[]; // required, exactly 3 items
-  galleryFiles: File[];
-  sortOrder: number | null;
-}
-
-export interface PreviewSiteCreationData {
-  name: string;
+  name?: string;
   slug: string;
   description?: string;
-  logoFile?: File | null;
-  miniProjects?: MiniProjectData[];
+  logoUrl?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  
+  // New flexible structure (snake_case in frontend)
+  site?: any;
+  header?: any;
+  footer?: any;
+  homepage?: any;
+  contact_modal?: any; 
+  about?: any;
+  project?: any;
+  gallery?: any;
+  months?: any;
+  projects_data?: any; 
+}
+
+export interface PreviewSiteUpdateDto {
+  name?: string;
+  slug?: string;
+  description?: string;
+  site?: any;
+  header?: any;
+  footer?: any;
+  homepage?: any;
+  contact_modal?: any;
+  about?: any;
+  project?: any;
+  gallery?: any;
+  months?: any;
+  projects_data?: any;
+}
+
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  totalCount: number;
+  pageNumber: number;
+  pageSize: number;
+  totalPages: number;
 }
