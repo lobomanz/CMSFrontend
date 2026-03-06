@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, useParams} from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { previewSitesApi } from "../../api/previewSites";
 import JsonEditor from "../../components/ui/JsonEditor";
@@ -21,7 +21,6 @@ const sections = [
 
 const PreviewSiteEditPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const qc = useQueryClient();
   const [activeTab, setActiveTab] = useState<string>("general");
 
