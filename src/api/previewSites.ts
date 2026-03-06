@@ -6,7 +6,7 @@ import type {
   PaginatedResponse,
 } from "../api/types";
 
-const base = "/api/PreviewSites";
+const base = "/PreviewSites";
 
 // Mapping dictionary for keys that don't follow standard camelCase or snake_case conventions
 const fieldMapping: Record<string, string> = {
