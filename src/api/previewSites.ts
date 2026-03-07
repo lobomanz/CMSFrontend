@@ -9,78 +9,52 @@ import type {
 
 const base = "/api/PreviewSites";
 
-const fieldMapping: Record<string, string> = {
-  contact_modal: "contactModal",
-  no_images: "noImages",
-  projects_data: "projects_Data",
-  contact_us: "contactUs",
-  or_at: "orAt",
-  name_placeholder: "namePlaceholder",
-  email_placeholder: "emailPlaceholder",
-  message_placeholder: "messagePlaceholder",
-  send_button: "sendButton",
-  hero_title: "heroTitle",
-  hero_img: "heroImg",
-  section1_title: "section1Title",
-  section1_desc: "section1Desc",
-  section1_img: "section1Img",
-  section2_title: "section2Title",
-  section2_desc: "section2Desc",
-  section3_img: "section3Img",
-  section3_title1: "section3Title1",
-  section3_desc1: "section3Desc1",
-  section3_title2: "section3Title2",
-  section3_desc2: "section3Desc2",
-  text_url: "textUrl",
-};
+/**
+ * The backend expects PascalCase for specific properties: 'Projects_Data' and 'ContactModal'.
+ * Most other properties are camelCased by ASP.NET Core.
+ */
+const mapToBackend = (data: PreviewSiteUpdateDto): Record<string, unknown> => {
+  if (!data) return {};
+  
+  const mapped: Record<string, unknown> = { ...data } as Record<string, unknown>;
 
-const inverseMapping: Record<string, string> = Object.entries(fieldMapping).reduce(
-  (acc, [frontendKey, backendKey]) => ({ ...acc, [backendKey]: frontendKey }),
-  {}
-);
-
-const isFile = (value: unknown): value is File =>
-  typeof File !== "undefined" && value instanceof File;
-
-const isPlainObject = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value) && !isFile(value);
-
-export const mapToBackend = (data: unknown): unknown => {
-  if (Array.isArray(data)) {
-    return data.map(mapToBackend);
+  // 'projects_data' -> 'Projects_Data'
+  if (mapped.projects_data) {
+    mapped.Projects_Data = mapped.projects_data;
+    delete mapped.projects_data;
   }
 
-  if (!isPlainObject(data)) {
-    return data;
+  // 'contact_modal' -> 'ContactModal'
+  if (mapped.contact_modal) {
+    mapped.ContactModal = mapped.contact_modal;
+    delete mapped.contact_modal;
   }
-
-  const mapped: Record<string, unknown> = {};
-
-  for (const [key, value] of Object.entries(data)) {
-    const backendKey = fieldMapping[key] || key;
-    mapped[backendKey] = mapToBackend(value);
-  }
-
+  
   return mapped;
 };
 
-export const mapFromBackend = (data: unknown): unknown => {
-  if (Array.isArray(data)) {
-    return data.map(mapFromBackend);
+/**
+ * The backend returns PascalCase for 'Projects_Data' and 'ContactModal'.
+ * We map them to the snake_case names used in frontend types for consistency with existing code.
+ */
+const mapFromBackend = (data: Record<string, unknown>): PreviewSiteDto => {
+  if (!data) return {} as PreviewSiteDto;
+
+  const mapped = { ...data };
+
+  // 'Projects_Data' -> 'projects_data'
+  if (mapped.projects_Data) {
+    mapped.projects_data = mapped.projects_Data;
+    delete mapped.projects_Data;
+  }
+  
+  // 'contactModal' or 'ContactModal' -> 'contact_modal'
+  if (mapped.contactModal) {
+    mapped.contact_modal = mapped.contactModal;
+    delete mapped.contactModal;
   }
 
-  if (!isPlainObject(data)) {
-    return data;
-  }
-
-  const mapped: Record<string, unknown> = {};
-
-  for (const [key, value] of Object.entries(data)) {
-    const frontendKey = inverseMapping[key] || key;
-    mapped[frontendKey] = mapFromBackend(value);
-  }
-
-  return mapped;
+  return mapped as unknown as PreviewSiteDto;
 };
 
 export const previewSitesApi = {
@@ -89,23 +63,23 @@ export const previewSitesApi = {
       .get<PaginatedResponse<PreviewSiteDto>>(base, { params })
       .then((r) => ({
         ...r.data,
-        items: r.data.items.map((item) => mapFromBackend(item) as PreviewSiteDto),
+        items: r.data.items.map((item) => mapFromBackend(item as unknown as Record<string, unknown>)),
       })),
 
   get: (id: Guid) =>
     axiosInstance
       .get<PreviewSiteDto>(`${base}/${id}`)
-      .then((r) => mapFromBackend(r.data) as PreviewSiteDto),
+      .then((r) => mapFromBackend(r.data as unknown as Record<string, unknown>)),
 
-  create: (input: { slug: string; name?: string; description?: string }) =>
+  create: (input: { slug: string; name?: string }) =>
     axiosInstance
-      .post<PreviewSiteDto>(base, mapToBackend(input))
-      .then((r) => mapFromBackend(r.data) as PreviewSiteDto),
+      .post<PreviewSiteDto>(base, mapToBackend(input as PreviewSiteUpdateDto))
+      .then((r) => mapFromBackend(r.data as unknown as Record<string, unknown>)),
 
   update: (id: Guid, input: PreviewSiteUpdateDto) =>
     axiosInstance
-      .patch<PreviewSiteDto>(`${base}/${id}`, mapToBackend(input) ?? {})
-      .then((r) => mapFromBackend(r.data) as PreviewSiteDto),
+      .patch<PreviewSiteDto>(`${base}/${id}`, mapToBackend(input))
+      .then((r) => mapFromBackend(r.data as unknown as Record<string, unknown>)),
 
   remove: (id: Guid) => axiosInstance.delete(`${base}/${id}`).then((r) => r.data),
 };

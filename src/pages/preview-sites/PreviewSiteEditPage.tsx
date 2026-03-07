@@ -6,8 +6,16 @@ import { previewSitesApi } from "../../api/previewSites";
 import type {
   PreviewSiteDto,
   PreviewSiteUpdateDto,
-  JsonObject,
   ApiError,
+  SiteConfigDto,
+  HeaderConfigDto,
+  FooterConfigDto,
+  HomepageConfigDto,
+  ContactModalConfigDto,
+  AboutConfigDto,
+  ProjectLabelsConfigDto,
+  GalleryConfigDto,
+  MiniProjectDto,
 } from "../../api/types";
 import JsonEditor from "../../components/ui/JsonEditor";
 import styles from "./PreviewSiteEditPage.module.css";
@@ -27,21 +35,20 @@ const sections = [
 
 type PreviewSiteSection = (typeof sections)[number];
 
-type EditFormData = PreviewSiteUpdateDto & {
+interface EditFormData {
   name: string;
   slug: string;
-  description: string;
-  site: JsonObject;
-  header: JsonObject;
-  footer: JsonObject;
-  homepage: JsonObject;
-  contact_modal: JsonObject;
-  about: JsonObject;
-  project: JsonObject;
-  gallery: JsonObject;
-  months: JsonObject;
-  projects_data: JsonObject;
-};
+  site: SiteConfigDto;
+  header: HeaderConfigDto;
+  footer: FooterConfigDto;
+  homepage: HomepageConfigDto;
+  contact_modal: ContactModalConfigDto;
+  about: AboutConfigDto;
+  project: ProjectLabelsConfigDto;
+  gallery: GalleryConfigDto;
+  months: string[];
+  projects_data: Record<string, MiniProjectDto>;
+}
 
 type ErrorWithResponse = {
   response?: {
@@ -59,35 +66,46 @@ type EditFormProps = {
 const isErrorWithResponse = (error: unknown): error is ErrorWithResponse =>
   typeof error === "object" && error !== null;
 
-const toJsonObject = (value: unknown): JsonObject => {
-  if (value && typeof value === "object" && !Array.isArray(value)) {
-    return value as JsonObject;
-  }
-
-  return {};
-};
-
 const buildFormData = (site: PreviewSiteDto): EditFormData => ({
   name: site.name || "",
   slug: site.slug || "",
-  description: site.description || "",
-  site: toJsonObject(site.site),
-  header: toJsonObject(site.header),
-  footer: toJsonObject(site.footer),
-  homepage: toJsonObject(site.homepage),
-  contact_modal: toJsonObject(site.contact_modal),
-  about: toJsonObject(site.about),
-  project: toJsonObject(site.project),
-  gallery: toJsonObject(site.gallery),
-  months: toJsonObject(site.months),
-  projects_data: toJsonObject(site.projects_data),
+  site: site.site || { name: "", email: "", phone: "" },
+  header: site.header || { projects: "", about: "", contact: "" },
+  footer: site.footer || { contactUs: "", orAt: "", copyright: "" },
+  homepage: site.homepage || { noImages: "", images: [] },
+  contact_modal: site.contact_modal || {
+    title: "",
+    namePlaceholder: "",
+    emailPlaceholder: "",
+    messagePlaceholder: "",
+    sendButton: "",
+    images: [],
+  },
+  about: site.about || {
+    heroTitle: "",
+    heroImg: "",
+    section1Title: "",
+    section1Desc: "",
+    section1Img: "",
+    section2Title: "",
+    section2Desc: "",
+    section3Img: "",
+    section3Title1: "",
+    section3Desc1: "",
+    section3Title2: "",
+    section3Desc2: "",
+  },
+  project: site.project || { untitled: "" },
+  gallery: site.gallery || { previous: "", next: "" },
+  months: site.months || [],
+  projects_data: site.projects_data || {},
 });
 
 const PreviewSiteEditForm: React.FC<EditFormProps> = ({ site, onSave, isSaving }) => {
   const [activeTab, setActiveTab] = useState<string>("general");
   const [formData, setFormData] = useState<EditFormData>(() => buildFormData(site));
 
-  const updateSection = (section: PreviewSiteSection, value: JsonObject) => {
+  const updateSection = (section: PreviewSiteSection, value: unknown) => {
     setFormData((prev) => ({
       ...prev,
       [section]: value,
@@ -167,18 +185,6 @@ const PreviewSiteEditForm: React.FC<EditFormProps> = ({ site, onSave, isSaving }
                   />
                   <p className={styles.help}>Unique identifier used in URLs.</p>
                 </div>
-
-                <div className={styles.field}>
-                  <label className={styles.label}>Description</label>
-                  <textarea
-                    className={styles.textarea}
-                    rows={4}
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, description: e.target.value }))
-                    }
-                  />
-                </div>
               </section>
             )}
 
@@ -188,14 +194,14 @@ const PreviewSiteEditForm: React.FC<EditFormProps> = ({ site, onSave, isSaving }
                   {activeTab.replace("_", " ").toUpperCase()} Data
                 </h2>
                 <p className={styles.cardSub}>
-                  Flexible JSON structure for {activeTab}.
+                  Edit the {activeTab} configuration.
                 </p>
 
                 <JsonEditor
                   id={activeTab}
-                  value={formData[activeTab as PreviewSiteSection]}
+                  value={formData[activeTab as PreviewSiteSection] as Record<string, unknown>}
                   onChange={(val) =>
-                    updateSection(activeTab as PreviewSiteSection, val as JsonObject)
+                    updateSection(activeTab as PreviewSiteSection, val)
                   }
                   rows={20}
                 />
