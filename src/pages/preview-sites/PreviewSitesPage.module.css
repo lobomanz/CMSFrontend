@@ -206,3 +206,62 @@
   text-align: center;
   color: #94a3b8;
 }
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.mutedSmall {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.stateText {
+  color: #64748b;
+  padding: 0.5rem 0;
+}
+
+.stateTextError {
+  color: #ef4444;
+  padding: 0.5rem 0;
+}
+
+.listMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.siteText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.btnPrimary {
+  background: #3b82f6;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.btnPrimary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}

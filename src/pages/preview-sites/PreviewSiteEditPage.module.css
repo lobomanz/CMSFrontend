@@ -132,7 +132,8 @@
   margin-bottom: 0.5rem;
 }
 
-.input, .textarea {
+.input,
+.textarea {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid #e2e8f0;
@@ -142,7 +143,8 @@
   transition: border-color 0.2s;
 }
 
-.input:focus, .textarea:focus {
+.input:focus,
+.textarea:focus {
   outline: none;
   border-color: #3b82f6;
   ring: 2px solid #3b82f6;
@@ -175,7 +177,8 @@
   cursor: not-allowed;
 }
 
-.loading, .error {
+.loading,
+.error {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -186,4 +189,15 @@
 
 .error {
   color: #ef4444;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }

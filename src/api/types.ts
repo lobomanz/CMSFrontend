@@ -1,69 +1,75 @@
 export interface ProjectDto {
-    id?: number;
-    title: string;
-    description: string;
-    imageUrl?: string;
-    projectUrl?: string;
-    sortOrder?: number;
-    isPublished?: boolean;
-    tags?: string[];
-  }
-  
-  export interface BlogDto {
-    id?: number;
-    title: string;
-    content: string;
-    author: string;
-    imageUrl?: string;
-    isPublished?: boolean;
-    tags?: string[];
-    createdAt?: string;
-  }
-  
-  export interface ImageModelDto {
-    id?: number;
-    url: string;
-    fileUrl?: string;
-    path?: string;
-    altText?: string;
-    sortOrder?: number;
-  }
-  
-  export interface AboutUsDto {
-    id?: number;
-    content: any; // JSON content
-  }
-  
-  export interface ContactInfoDto {
-    id?: number;
-    data: any; // JSON content for contact info
-  }
-  
-  export interface ApiError {
-    message: string;
-  }
-  
-  export interface UserDto {
-    id?: string;
-    username: string;
-    password?: string;
-  }
-  
-  export type UserRole = 'Admin' | 'Basic';
+  id?: number;
+  title: string;
+  description: string;
+  imageUrl?: string;
+  projectUrl?: string;
+  sortOrder?: number;
+  isPublished?: boolean;
+  tags?: string[];
+}
 
-  export interface RegisterDto {
+export interface BlogDto {
+  id?: number;
+  title: string;
+  content: string;
+  author: string;
+  imageUrl?: string;
+  isPublished?: boolean;
+  tags?: string[];
+  createdAt?: string;
+}
+
+export interface ImageModelDto {
+  id?: number;
+  url: string;
+  fileUrl?: string;
+  path?: string;
+  altText?: string;
+  sortOrder?: number;
+}
+
+export type JsonPrimitive = string | number | boolean | null;
+export type JsonValue = JsonPrimitive | JsonObject | JsonValue[];
+export interface JsonObject {
+  [key: string]: JsonValue;
+}
+
+export interface AboutUsDto {
+  id?: number;
+  content: JsonValue;
+}
+
+export interface ContactInfoDto {
+  id?: number;
+  data: JsonValue;
+}
+
+export interface ApiError {
+  message: string;
+}
+
+export interface UserDto {
+  id?: string;
+  username: string;
+  password?: string;
+}
+
+export type UserRole = "Admin" | "Basic";
+
+export interface RegisterDto {
   username: string;
   password: string;
   confirmPassword: string;
   role: UserRole;
   isActive: boolean;
 }
-  
-  export interface AuthResponse {
-    token: string;
-  }
 
-  export type Guid = string;
+export interface AuthResponse {
+  token: string;
+}
+
+export type Guid = string;
 
 export interface PreviewSiteDto {
   id: Guid;
@@ -73,36 +79,34 @@ export interface PreviewSiteDto {
   logoUrl?: string;
   createdAt?: string;
   updatedAt?: string;
-  
-  // New flexible structure (snake_case in frontend)
-  site?: any;
-  header?: any;
-  footer?: any;
-  homepage?: any;
-  contact_modal?: any; 
-  about?: any;
-  project?: any;
-  gallery?: any;
-  months?: any;
-  projects_data?: any; 
+
+  site?: JsonValue;
+  header?: JsonValue;
+  footer?: JsonValue;
+  homepage?: JsonValue;
+  contact_modal?: JsonValue;
+  about?: JsonValue;
+  project?: JsonValue;
+  gallery?: JsonValue;
+  months?: JsonValue;
+  projects_data?: JsonValue;
 }
 
 export interface PreviewSiteUpdateDto {
   name?: string;
   slug?: string;
   description?: string;
-  site?: any;
-  header?: any;
-  footer?: any;
-  homepage?: any;
-  contact_modal?: any;
-  about?: any;
-  project?: any;
-  gallery?: any;
-  months?: any;
-  projects_data?: any;
+  site?: JsonValue;
+  header?: JsonValue;
+  footer?: JsonValue;
+  homepage?: JsonValue;
+  contact_modal?: JsonValue;
+  about?: JsonValue;
+  project?: JsonValue;
+  gallery?: JsonValue;
+  months?: JsonValue;
+  projects_data?: JsonValue;
 }
-
 
 export interface PaginatedResponse<T> {
   items: T[];
