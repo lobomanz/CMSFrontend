@@ -31,6 +31,7 @@ export interface ImageModelDto {
 
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = JsonPrimitive | JsonObject | JsonValue[];
+
 export interface JsonObject {
   [key: string]: JsonValue;
 }
@@ -79,7 +80,6 @@ export interface PreviewSiteDto {
   logoUrl?: string;
   createdAt?: string;
   updatedAt?: string;
-
   site?: JsonValue;
   header?: JsonValue;
   footer?: JsonValue;
@@ -106,6 +106,12 @@ export interface PreviewSiteUpdateDto {
   gallery?: JsonValue;
   months?: JsonValue;
   projects_data?: JsonValue;
+}
+
+export interface PreviewSiteListParams {
+  pageNumber?: number;
+  pageSize?: number;
+  searchTerm?: string;
 }
 
 export interface PaginatedResponse<T> {

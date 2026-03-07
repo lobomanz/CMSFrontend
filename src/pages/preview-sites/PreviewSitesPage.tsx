@@ -4,9 +4,19 @@ import { Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
 
 import { previewSitesApi } from "../../api/previewSites";
-import type { PreviewSiteDto } from "../../api/types";
+import type { PreviewSiteDto, ApiError } from "../../api/types";
 
 import styles from "./PreviewSitesPage.module.css";
+
+type ErrorWithResponse = {
+  response?: {
+    data?: ApiError;
+  };
+  message?: string;
+};
+
+const isErrorWithResponse = (error: unknown): error is ErrorWithResponse =>
+  typeof error === "object" && error !== null;
 
 const PreviewSitesPage: React.FC = () => {
   const qc = useQueryClient();
@@ -14,17 +24,20 @@ const PreviewSitesPage: React.FC = () => {
   const [pageNumber, setPageNumber] = useState(1);
   const pageSize = 10;
 
-  // Search/Pagination
   const { data, isLoading, error, isFetching } = useQuery({
-    queryKey: ["previewSites", { searchTerm, pageNumber }],
-    queryFn: () => previewSitesApi.list({ pageNumber, pageSize, searchTerm: searchTerm || undefined }),
+    queryKey: ["previewSites", { searchTerm, pageNumber, pageSize }],
+    queryFn: () =>
+      previewSitesApi.list({
+        pageNumber,
+        pageSize,
+        searchTerm: searchTerm || undefined,
+      }),
   });
 
   const sites = data?.items ?? [];
   const totalCount = data?.totalCount ?? 0;
   const totalPages = data?.totalPages ?? 0;
 
-  // Create Site
   const [newSlug, setNewSlug] = useState("");
   const [newName, setNewName] = useState("");
 
@@ -36,8 +49,15 @@ const PreviewSitesPage: React.FC = () => {
       setNewName("");
       qc.invalidateQueries({ queryKey: ["previewSites"] });
     },
-    onError: (e: any) => {
-      toast.error(e?.response?.data?.message ?? e?.message ?? "Failed to create preview site.");
+    onError: (error: unknown) => {
+      if (isErrorWithResponse(error)) {
+        toast.error(
+          error.response?.data?.message ?? error.message ?? "Failed to create preview site."
+        );
+        return;
+      }
+
+      toast.error("Failed to create preview site.");
     },
   });
 
@@ -47,22 +67,35 @@ const PreviewSitesPage: React.FC = () => {
       toast.success("Preview site deleted.");
       qc.invalidateQueries({ queryKey: ["previewSites"] });
     },
-    onError: (e: any) => toast.error(e?.response?.data?.message ?? e?.message ?? "Failed to delete preview site."),
+    onError: (error: unknown) => {
+      if (isErrorWithResponse(error)) {
+        toast.error(
+          error.response?.data?.message ?? error.message ?? "Failed to delete preview site."
+        );
+        return;
+      }
+
+      toast.error("Failed to delete preview site.");
+    },
   });
 
   const handleCreate = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newSlug) {
+
+    if (!newSlug.trim()) {
       toast.error("Slug is required.");
       return;
     }
-    createMut.mutate({ slug: newSlug, name: newName || undefined });
+
+    createMut.mutate({
+      slug: newSlug.trim(),
+      name: newName.trim() || undefined,
+    });
   };
 
   return (
     <div className={styles.page}>
       <div className={styles.container}>
-        {/* Header */}
         <div className={styles.header}>
           <div>
             <h1 className={styles.title}>Preview Sites</h1>
@@ -75,11 +108,11 @@ const PreviewSitesPage: React.FC = () => {
           </div>
         </div>
 
-        {/* List */}
         <section className={styles.card}>
           <div className={styles.cardHeaderRow}>
             <h2 className={styles.cardTitle}>All sites</h2>
-            <div className={styles.field} style={{ marginBottom: 0, width: '300px' }}>
+
+            <div className={styles.field} style={{ marginBottom: 0, width: "300px" }}>
               <input
                 id="searchTerm"
                 className={styles.input}
@@ -103,12 +136,17 @@ const PreviewSitesPage: React.FC = () => {
                   <div className={styles.listMain}>
                     <div className={styles.siteLine}>
                       {s.logoUrl ? (
-                        <img src={s.logoUrl} alt={s.name} className={styles.siteLogo} />
+                        <img
+                          src={s.logoUrl}
+                          alt={s.name || s.slug}
+                          className={styles.siteLogo}
+                        />
                       ) : (
                         <div className={styles.siteLogoPlaceholder} />
                       )}
+
                       <div className={styles.siteText}>
-                        <div className={styles.siteName}>{s.name || 'Unnamed Site'}</div>
+                        <div className={styles.siteName}>{s.name || "Unnamed Site"}</div>
                         <div className={styles.siteSlug}>/{s.slug}</div>
                       </div>
                     </div>
@@ -122,7 +160,9 @@ const PreviewSitesPage: React.FC = () => {
                     <button
                       className={styles.btnDanger}
                       onClick={() => {
-                        if (window.confirm(`Delete "${s.slug}"?`)) deleteMut.mutate(s.id);
+                        if (window.confirm(`Delete "${s.slug}"?`)) {
+                          deleteMut.mutate(s.id);
+                        }
                       }}
                       disabled={deleteMut.isPending}
                     >
@@ -132,25 +172,28 @@ const PreviewSitesPage: React.FC = () => {
                 </div>
               ))}
 
-              {!isLoading && sites.length === 0 && <div className={styles.empty}>No preview sites found.</div>}
+              {!isLoading && sites.length === 0 && (
+                <div className={styles.empty}>No preview sites found.</div>
+              )}
             </div>
 
-            {/* Pagination */}
             {totalPages > 1 && (
               <div className={styles.pagination}>
                 <button
                   disabled={pageNumber <= 1}
-                  onClick={() => setPageNumber(prev => prev - 1)}
+                  onClick={() => setPageNumber((prev) => prev - 1)}
                   className={styles.btn}
                 >
                   Previous
                 </button>
+
                 <span className={styles.pageInfo}>
                   Page {pageNumber} of {totalPages}
                 </span>
+
                 <button
                   disabled={pageNumber >= totalPages}
-                  onClick={() => setPageNumber(prev => prev + 1)}
+                  onClick={() => setPageNumber((prev) => prev + 1)}
                   className={styles.btn}
                 >
                   Next
@@ -160,7 +203,6 @@ const PreviewSitesPage: React.FC = () => {
           </div>
         </section>
 
-        {/* Quick Create */}
         <section className={styles.card}>
           <div className={styles.cardHeader}>
             <h2 className={styles.cardTitle}>Create New Site</h2>
@@ -179,6 +221,7 @@ const PreviewSitesPage: React.FC = () => {
                   required
                 />
               </div>
+
               <div className={styles.field}>
                 <label className={styles.label}>Name (optional)</label>
                 <input
@@ -188,6 +231,7 @@ const PreviewSitesPage: React.FC = () => {
                   onChange={(e) => setNewName(e.target.value)}
                 />
               </div>
+
               <div className={styles.actions}>
                 <button
                   className={styles.btnPrimary}

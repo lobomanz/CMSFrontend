@@ -4,6 +4,7 @@ import type {
   PreviewSiteUpdateDto,
   Guid,
   PaginatedResponse,
+  PreviewSiteListParams,
 } from "../api/types";
 
 const base = "/api/PreviewSites";
@@ -83,7 +84,7 @@ export const mapFromBackend = (data: unknown): unknown => {
 };
 
 export const previewSitesApi = {
-  list: (params?: { pageNumber?: number; pageSize?: number; searchTerm?: string }) =>
+  list: (params?: PreviewSiteListParams) =>
     axiosInstance
       .get<PaginatedResponse<PreviewSiteDto>>(base, { params })
       .then((r) => ({
@@ -103,7 +104,7 @@ export const previewSitesApi = {
 
   update: (id: Guid, input: PreviewSiteUpdateDto) =>
     axiosInstance
-      .patch<PreviewSiteDto>(`${base}/${id}`, mapToBackend(input))
+      .patch<PreviewSiteDto>(`${base}/${id}`, mapToBackend(input) ?? {})
       .then((r) => mapFromBackend(r.data) as PreviewSiteDto),
 
   remove: (id: Guid) => axiosInstance.delete(`${base}/${id}`).then((r) => r.data),

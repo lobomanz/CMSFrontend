@@ -3,7 +3,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { previewSitesApi } from "../../api/previewSites";
-import type { PreviewSiteDto, PreviewSiteUpdateDto, JsonObject, ApiError } from "../../api/types";
+import type {
+  PreviewSiteDto,
+  PreviewSiteUpdateDto,
+  JsonObject,
+  ApiError,
+} from "../../api/types";
 import JsonEditor from "../../components/ui/JsonEditor";
 import styles from "./PreviewSiteEditPage.module.css";
 
@@ -45,6 +50,12 @@ type ErrorWithResponse = {
   message?: string;
 };
 
+type EditFormProps = {
+  site: PreviewSiteDto;
+  onSave: (payload: PreviewSiteUpdateDto) => void;
+  isSaving: boolean;
+};
+
 const isErrorWithResponse = (error: unknown): error is ErrorWithResponse =>
   typeof error === "object" && error !== null;
 
@@ -52,6 +63,7 @@ const toJsonObject = (value: unknown): JsonObject => {
   if (value && typeof value === "object" && !Array.isArray(value)) {
     return value as JsonObject;
   }
+
   return {};
 };
 
@@ -70,12 +82,6 @@ const buildFormData = (site: PreviewSiteDto): EditFormData => ({
   months: toJsonObject(site.months),
   projects_data: toJsonObject(site.projects_data),
 });
-
-type EditFormProps = {
-  site: PreviewSiteDto;
-  onSave: (payload: PreviewSiteUpdateDto) => void;
-  isSaving: boolean;
-};
 
 const PreviewSiteEditForm: React.FC<EditFormProps> = ({ site, onSave, isSaving }) => {
   const [activeTab, setActiveTab] = useState<string>("general");
@@ -245,7 +251,7 @@ const PreviewSiteEditPage: React.FC = () => {
 
   return (
     <PreviewSiteEditForm
-      key={site.id}
+      key={`${site.id}-${site.updatedAt ?? ""}`}
       site={site}
       onSave={(payload) => updateMut.mutate(payload)}
       isSaving={updateMut.isPending}
