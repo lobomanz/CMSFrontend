@@ -69,9 +69,9 @@ export const previewSitesApi = {
         items: r.data.items.map((item) => mapFromBackend(item as unknown as Record<string, unknown>)),
       })),
 
-  get: (id: Guid) =>
+  get: (idOrSlug: string) =>
     axiosInstance
-      .get<PreviewSiteDto>(`${base}/${id}`)
+      .get<PreviewSiteDto>(`${base}/${idOrSlug}`)
       .then((r) => mapFromBackend(r.data as unknown as Record<string, unknown>)),
 
   create: (input: { slug: string; name?: string; logoUrl?: string }) =>
@@ -79,10 +79,10 @@ export const previewSitesApi = {
       .post<PreviewSiteDto>(base, mapToBackend(input as PreviewSiteUpdateDto))
       .then((r) => mapFromBackend(r.data as unknown as Record<string, unknown>)),
 
-  update: (id: Guid, input: PreviewSiteUpdateDto) =>
+  update: (idOrSlug: string, input: PreviewSiteUpdateDto) =>
     axiosInstance
-      .patch<PreviewSiteDto>(`${base}/${id}`, mapToBackend(input))
+      .patch<PreviewSiteDto>(`${base}/${idOrSlug}`, mapToBackend(input))
       .then((r) => mapFromBackend(r.data as unknown as Record<string, unknown>)),
 
-  remove: (id: Guid) => axiosInstance.delete(`${base}/${id}`).then((r) => r.data),
+  remove: (idOrSlug: string) => axiosInstance.delete(`${base}/${idOrSlug}`).then((r) => r.data),
 };
