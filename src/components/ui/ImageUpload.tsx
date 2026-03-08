@@ -29,6 +29,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label, class
       });
 
       const results = await Promise.all(uploadPromises);
+      // Backend returns 'imageUrl', we map it here
       const urls = results.map(r => r.imageUrl);
 
       if (multiple) {

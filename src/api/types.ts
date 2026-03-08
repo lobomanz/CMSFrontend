@@ -151,6 +151,7 @@ export interface PreviewSiteDto {
   id: Guid;
   name: string;
   slug: string;
+  logoUrl?: string;
   createdAt: string;
   updatedAt: string;
   site: SiteConfigDto;
@@ -163,7 +164,6 @@ export interface PreviewSiteDto {
   gallery: GalleryConfigDto;
   months: string[];
   projects_data: Record<string, MiniProjectDto>;
-  logoUrl?: string; // Still useful if needed
 }
 
 export interface PreviewSiteUpdateDto {
