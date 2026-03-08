@@ -143,7 +143,11 @@ export interface MiniProjectDto {
   date?: string;
   thumbnailUrl?: string;
   galleryImageUrls: string[];
+  thumbnail?: string;
+  gallery?: string[];
+  text_url?: string;
   textUrl?: string;
+  descriptionHtml?: string;
   sortOrder?: number;
 }
 

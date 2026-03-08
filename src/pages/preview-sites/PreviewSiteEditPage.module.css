@@ -279,6 +279,22 @@
 .projectKey {
   font-weight: 600;
   color: #475569;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
   font-family: monospace;
+}
+
+.cardHeaderFlex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.projectItemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
 }

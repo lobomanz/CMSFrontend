@@ -22,6 +22,7 @@ import FormField from "../../components/ui/FormField";
 import Input from "../../components/ui/Input";
 import Textarea from "../../components/ui/Textarea";
 import Button from "../../components/ui/Button";
+import RichTextEditor from "../../components/ui/RichTextEditor";
 import styles from "./PreviewSiteEditPage.module.css";
 
 const sections = [
@@ -124,6 +125,37 @@ const PreviewSiteEditForm: React.FC<EditFormProps> = ({ site, onSave, isSaving }
         [field]: value,
       },
     }));
+  };
+
+  const addProject = () => {
+    const id = prompt("Enter project ID (e.g., 666):");
+    if (!id) return;
+    if (formData.projects_data[id]) {
+      toast.error("Project ID already exists.");
+      return;
+    }
+
+    const newProject: MiniProjectDto = {
+      title: "New Project",
+      date: "",
+      thumbnail: "",
+      gallery: [],
+      galleryImageUrls: [],
+      text_url: "",
+      descriptionHtml: "",
+    };
+
+    updateSection("projects_data", {
+      ...formData.projects_data,
+      [id]: newProject,
+    });
+  };
+
+  const removeProject = (id: string) => {
+    if (!confirm(`Are you sure you want to remove project ${id}?`)) return;
+    const newData = { ...formData.projects_data };
+    delete newData[id];
+    updateSection("projects_data", newData);
   };
 
   return (
@@ -511,12 +543,19 @@ const PreviewSiteEditForm: React.FC<EditFormProps> = ({ site, onSave, isSaving }
 
             {activeTab === "projects_data" && (
               <section className={styles.card}>
-                <h2 className={styles.cardTitle}>Projects Data</h2>
+                <div className={styles.cardHeaderFlex}>
+                  <h2 className={styles.cardTitle}>Projects Data</h2>
+                  <Button variant="secondary" size="sm" onClick={addProject}>+ Add Project</Button>
+                </div>
                 <p className={styles.cardSub}>Individual project configurations.</p>
                 <div className={styles.projectsList}>
                   {Object.entries(formData.projects_data).map(([key, project]) => (
                     <div key={key} className={styles.projectItem}>
-                      <h4 className={styles.projectKey}>{key}</h4>
+                      <div className={styles.projectItemHeader}>
+                        <h4 className={styles.projectKey}>ID: {key}</h4>
+                        <Button variant="destructive" size="sm" onClick={() => removeProject(key)}>Remove</Button>
+                      </div>
+                      
                       <FormField label="Title" htmlFor={`proj-${key}-title`}>
                         <Input
                           id={`proj-${key}-title`}
@@ -528,27 +567,66 @@ const PreviewSiteEditForm: React.FC<EditFormProps> = ({ site, onSave, isSaving }
                           }}
                         />
                       </FormField>
-                      <FormField label="Thumbnail">
-                        <ImageUpload
-                          value={project.thumbnailUrl}
-                          onChange={(url) => {
+
+                      <FormField label="Date" htmlFor={`proj-${key}-date`}>
+                        <Input
+                          id={`proj-${key}-date`}
+                          value={project.date}
+                          onChange={(e) => {
                             const newData = { ...formData.projects_data };
-                            newData[key] = { ...project, thumbnailUrl: url as string };
+                            newData[key] = { ...project, date: e.target.value };
                             updateSection("projects_data", newData);
                           }}
                         />
                       </FormField>
+
+                      <FormField label="Thumbnail">
+                        <ImageUpload
+                          value={project.thumbnail || project.thumbnailUrl}
+                          onChange={(url) => {
+                            const newData = { ...formData.projects_data };
+                            // Set both for compatibility
+                            newData[key] = { ...project, thumbnail: url as string, thumbnailUrl: url as string };
+                            updateSection("projects_data", newData);
+                          }}
+                        />
+                      </FormField>
+
                       <FormField label="Gallery Images">
                         <ImageUpload
                           multiple
-                          value={project.galleryImageUrls}
+                          value={project.gallery || project.galleryImageUrls}
                           onChange={(urls) => {
                             const newData = { ...formData.projects_data };
-                            newData[key] = { ...project, galleryImageUrls: urls as string[] };
+                            // Set both for compatibility
+                            newData[key] = { ...project, gallery: urls as string[], galleryImageUrls: urls as string[] };
                             updateSection("projects_data", newData);
                           }}
                         />
                       </FormField>
+
+                      <FormField label="Google Docs URL (Optional)" htmlFor={`proj-${key}-text`}>
+                        <Input
+                          id={`proj-${key}-text`}
+                          value={project.text_url || project.textUrl}
+                          onChange={(e) => {
+                            const newData = { ...formData.projects_data };
+                            newData[key] = { ...project, text_url: e.target.value, textUrl: e.target.value };
+                            updateSection("projects_data", newData);
+                          }}
+                        />
+                      </FormField>
+
+                      <RichTextEditor
+                        label="Project Description (Rich Text)"
+                        value={project.descriptionHtml || ""}
+                        onChange={(content) => {
+                          const newData = { ...formData.projects_data };
+                          newData[key] = { ...project, descriptionHtml: content };
+                          updateSection("projects_data", newData);
+                        }}
+                        placeholder="Describe the project..."
+                      />
                     </div>
                   ))}
                 </div>
