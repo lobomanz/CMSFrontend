@@ -13,7 +13,7 @@ import { AxiosError } from 'axios';
 const ImageCreatePage: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [formData, setFormData] = useState<ImageModelDto>({ url: '' });
+  const [formData, setFormData] = useState<ImageModelDto>({ imageUrl: '' });
   const [isJsonValid, setIsJsonValid] = useState<boolean>(true);
 
   const createImageMutation = useMutation<ImageModelDto, AxiosError<ApiError>, ImageModelDto>({

@@ -90,8 +90,8 @@ const ImageListPage: React.FC = () => {
                   <TableRow key={image.id}>
                     <TableCell className="font-medium">{image.id}</TableCell>
                     <TableCell>
-                      {image.url || image.fileUrl || image.path ? (
-                        <a href={(image.url || image.fileUrl || image.path) as string} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                      {image.imageUrl || image.fileUrl || image.path ? (
+                        <a href={(image.imageUrl || image.fileUrl || image.path) as string} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                           View
                         </a>
                       ) : 'N/A'}

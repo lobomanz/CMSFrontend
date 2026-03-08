@@ -26,7 +26,7 @@ const ImageDetailPage: React.FC = () => {
 
   const getImageUrl = (image: ImageModelDto) => {
     // Check for common URL fields
-    if (typeof image.url === 'string' && image.url.startsWith('http')) return image.url;
+    if (typeof image.imageUrl === 'string' && image.imageUrl.startsWith('http')) return image.imageUrl;
     if (typeof image.fileUrl === 'string' && image.fileUrl.startsWith('http')) return image.fileUrl;
     if (typeof image.path === 'string' && image.path.startsWith('http')) return image.path;
     return null;

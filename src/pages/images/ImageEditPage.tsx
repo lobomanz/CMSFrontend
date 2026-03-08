@@ -15,7 +15,7 @@ const ImageEditPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
 
-  const [formData, setFormData] = useState<ImageModelDto>({ url: '' });
+  const [formData, setFormData] = useState<ImageModelDto>({ imageUrl: '' });
   const [isJsonValid, setIsJsonValid] = useState<boolean>(true);
 
   const {
