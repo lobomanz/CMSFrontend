@@ -37,7 +37,6 @@ const sections = [
   "projects_data",
 ] as const;
 
-
 interface EditFormData {
   name: string;
   slug: string;
@@ -127,19 +126,6 @@ const PreviewSiteEditForm: React.FC<EditFormProps> = ({ site, onSave, isSaving }
     }));
   };
 
-  const handleAddImage = (section: "homepage" | "contact_modal", url: string) => {
-    if (!url) return;
-    const currentImages = (formData[section] as HomepageConfigDto | ContactModalConfigDto).images || [];
-    updateNestedField(section, "images", [...currentImages, url]);
-  };
-
-  const handleRemoveImage = (section: "homepage" | "contact_modal", index: number) => {
-    const currentImages = (formData[section] as HomepageConfigDto | ContactModalConfigDto).images || [];
-    const newImages = [...currentImages];
-    newImages.splice(index, 1);
-    updateNestedField(section, "images", newImages);
-  };
-
   return (
     <div className={styles.page}>
       <div className={styles.container}>
@@ -199,7 +185,7 @@ const PreviewSiteEditForm: React.FC<EditFormProps> = ({ site, onSave, isSaving }
                   />
                 </FormField>
 
-                <FormField label="Slug *" htmlFor="slug" >
+                <FormField label="Slug *" htmlFor="slug">
                   <Input
                     id="slug"
                     value={formData.slug}
@@ -210,7 +196,7 @@ const PreviewSiteEditForm: React.FC<EditFormProps> = ({ site, onSave, isSaving }
                 <FormField label="Logo">
                   <ImageUpload
                     value={formData.logoUrl}
-                    onChange={(url) => updateSection("logoUrl", url)}
+                    onChange={(url) => updateSection("logoUrl", url as string)}
                   />
                 </FormField>
               </section>
@@ -307,18 +293,13 @@ const PreviewSiteEditForm: React.FC<EditFormProps> = ({ site, onSave, isSaving }
                     onChange={(e) => updateNestedField("homepage", "noImages", e.target.value)}
                   />
                 </FormField>
-                <div className={styles.imageGridSection}>
-                  <label className={styles.label}>Slider/Gallery Images</label>
-                  <div className={styles.imageGrid}>
-                    {formData.homepage.images.map((img, idx) => (
-                      <div key={idx} className={styles.imageItem}>
-                        <img src={img} alt="" />
-                        <button onClick={() => handleRemoveImage("homepage", idx)}>×</button>
-                      </div>
-                    ))}
-                    <ImageUpload onChange={(url) => handleAddImage("homepage", url)} />
-                  </div>
-                </div>
+                <FormField label="Slider/Gallery Images">
+                  <ImageUpload
+                    multiple
+                    value={formData.homepage.images}
+                    onChange={(urls) => updateNestedField("homepage", "images", urls)}
+                  />
+                </FormField>
               </section>
             )}
 
@@ -360,18 +341,13 @@ const PreviewSiteEditForm: React.FC<EditFormProps> = ({ site, onSave, isSaving }
                     onChange={(e) => updateNestedField("contact_modal", "sendButton", e.target.value)}
                   />
                 </FormField>
-                <div className={styles.imageGridSection}>
-                  <label className={styles.label}>Modal Images</label>
-                  <div className={styles.imageGrid}>
-                    {formData.contact_modal.images.map((img, idx) => (
-                      <div key={idx} className={styles.imageItem}>
-                        <img src={img} alt="" />
-                        <button onClick={() => handleRemoveImage("contact_modal", idx)}>×</button>
-                      </div>
-                    ))}
-                    <ImageUpload onChange={(url) => handleAddImage("contact_modal", url)} />
-                  </div>
-                </div>
+                <FormField label="Modal Images">
+                  <ImageUpload
+                    multiple
+                    value={formData.contact_modal.images}
+                    onChange={(urls) => updateNestedField("contact_modal", "images", urls)}
+                  />
+                </FormField>
               </section>
             )}
 
@@ -390,7 +366,7 @@ const PreviewSiteEditForm: React.FC<EditFormProps> = ({ site, onSave, isSaving }
                 <FormField label="Hero Image">
                   <ImageUpload
                     value={formData.about.heroImg}
-                    onChange={(url) => updateNestedField("about", "heroImg", url)}
+                    onChange={(url) => updateNestedField("about", "heroImg", url as string)}
                   />
                 </FormField>
 
@@ -413,7 +389,7 @@ const PreviewSiteEditForm: React.FC<EditFormProps> = ({ site, onSave, isSaving }
                 <FormField label="Image">
                   <ImageUpload
                     value={formData.about.section1Img}
-                    onChange={(url) => updateNestedField("about", "section1Img", url)}
+                    onChange={(url) => updateNestedField("about", "section1Img", url as string)}
                   />
                 </FormField>
 
@@ -439,7 +415,7 @@ const PreviewSiteEditForm: React.FC<EditFormProps> = ({ site, onSave, isSaving }
                 <FormField label="Main Image">
                   <ImageUpload
                     value={formData.about.section3Img}
-                    onChange={(url) => updateNestedField("about", "section3Img", url)}
+                    onChange={(url) => updateNestedField("about", "section3Img", url as string)}
                   />
                 </FormField>
                 <div className={styles.grid2}>
@@ -557,7 +533,18 @@ const PreviewSiteEditForm: React.FC<EditFormProps> = ({ site, onSave, isSaving }
                           value={project.thumbnailUrl}
                           onChange={(url) => {
                             const newData = { ...formData.projects_data };
-                            newData[key] = { ...project, thumbnailUrl: url };
+                            newData[key] = { ...project, thumbnailUrl: url as string };
+                            updateSection("projects_data", newData);
+                          }}
+                        />
+                      </FormField>
+                      <FormField label="Gallery Images">
+                        <ImageUpload
+                          multiple
+                          value={project.galleryImageUrls}
+                          onChange={(urls) => {
+                            const newData = { ...formData.projects_data };
+                            newData[key] = { ...project, galleryImageUrls: urls as string[] };
                             updateSection("projects_data", newData);
                           }}
                         />
