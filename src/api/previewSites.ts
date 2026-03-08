@@ -43,15 +43,15 @@ const mapFromBackend = (data: Record<string, unknown>): PreviewSiteDto => {
   const mapped = { ...data };
 
   // 'Projects_Data' -> 'projects_data'
-  if (mapped.projects_Data) {
-    mapped.projects_data = mapped.projects_Data;
-    delete mapped.projects_Data;
+  if (mapped.Projects_Data) {
+    mapped.projects_data = mapped.Projects_Data;
+    delete mapped.Projects_Data;
   }
   
-  // 'contactModal' or 'ContactModal' -> 'contact_modal'
-  if (mapped.contactModal) {
-    mapped.contact_modal = mapped.contactModal;
-    delete mapped.contactModal;
+  // 'ContactModal' -> 'contact_modal'
+  if (mapped.ContactModal) {
+    mapped.contact_modal = mapped.ContactModal;
+    delete mapped.ContactModal;
   }
 
   return mapped as unknown as PreviewSiteDto;

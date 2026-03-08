@@ -169,6 +169,7 @@ export interface PreviewSiteDto {
 export interface PreviewSiteUpdateDto {
   name?: string;
   slug?: string;
+  logoUrl?: string;
   site?: Partial<SiteConfigDto>;
   header?: Partial<HeaderConfigDto>;
   footer?: Partial<FooterConfigDto>;
