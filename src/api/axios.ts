@@ -1,6 +1,5 @@
 import axios, { type AxiosInstance } from 'axios';
-import { useAuthStore } from '../auth/useAuth'; // Assuming zustand store for auth
-
+import { useAuthStore } from '../auth/useAuth';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7123';
 
@@ -14,10 +13,27 @@ const axiosInstance: AxiosInstance = axios.create({
 // Request interceptor to add the JWT token to headers
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = useAuthStore.getState().token;
+    // Attempt to get token from store first, then localStorage as fallback
+    let token = useAuthStore.getState().token;
+    
+    if (!token) {
+      const authData = localStorage.getItem('auth-storage');
+      if (authData) {
+        try {
+          const parsed = JSON.parse(authData);
+          token = parsed.state?.token;
+        } catch (e) {
+          console.error("Error parsing auth-storage", e);
+        }
+      }
+    }
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.warn("No auth token found for request:", config.url);
     }
+    
     return config;
   },
   (error) => {
@@ -30,11 +46,9 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      console.error("401 Unauthorized - redirecting to login");
       useAuthStore.getState().logout();
-      // Using a global navigation hook or context for non-React component files
-      // For simplicity here, we'll assume a global navigation function or handle it in components
-      // In a real app, you might use a custom hook that leverages navigate from react-router-dom
-      window.location.href = '/login'; // Redirect to login page
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
@@ -48,7 +62,9 @@ export const api = {
   create: <T, R>(url: string, data: T) => axiosInstance.post<R>(url, data).then(res => res.data),
   update: <T, R>(url: string, id: string | number, data: T) => axiosInstance.put<R>(`${url}/${id}`, data).then(res => res.data),
   remove: (url: string, id: string | number) => axiosInstance.delete(`${url}/${id}`).then(res => res.data),
+  // Fixed upload helper to use axiosInstance properly without overwriting essential headers
   upload: <T, R>(url: string, data: T) => axiosInstance.post<R>(url, data, {
+    // Let axios set the boundary for multipart/form-data automatically
     headers: {
       'Content-Type': 'multipart/form-data',
     },
