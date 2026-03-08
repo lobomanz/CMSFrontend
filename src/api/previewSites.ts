@@ -2,7 +2,6 @@ import axiosInstance from "./axios";
 import type {
   PreviewSiteDto,
   PreviewSiteUpdateDto,
-  Guid,
   PaginatedResponse,
   PreviewSiteListParams,
 } from "./types";
