@@ -22,7 +22,7 @@ export interface BlogDto {
 
 export interface ImageModelDto {
   id?: number;
-  url: string;
+  imageUrl: string;
   fileUrl?: string;
   path?: string;
   altText?: string;

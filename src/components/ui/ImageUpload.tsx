@@ -29,7 +29,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ value, onChange, label, class
       });
 
       const results = await Promise.all(uploadPromises);
-      const urls = results.map(r => r.url);
+      const urls = results.map(r => r.imageUrl);
 
       if (multiple) {
         const currentUrls = Array.isArray(value) ? value : (value ? [value] : []);
